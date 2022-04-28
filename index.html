@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.0.8");
+        console.log("0.0.0.9");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -82,8 +82,8 @@
             for(i=0;i<renderBox.length;++i) {
                 for(x=0;x<200;++x) {
                     for(y=0;y<200;++y) {
-                        if (renderBox[x]) {
-                            if (renderBox[x][y]) {
+                        if (renderBox[i][x]) {
+                            if (renderBox[i][x][y]) {
                                 ctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
                             };
                         }
