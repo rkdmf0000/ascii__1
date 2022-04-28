@@ -1,0 +1,219 @@
+<script>
+    ;(function(parent, canvas, _mcanvas) {
+
+        var imageLength = 0;
+        var imageBox    = [];
+
+        var renderBox   = [];
+
+        var option      = {
+            initLoad        : false,
+            parentWidth     : 0,
+            parentHeight    : 0,
+            textSpace       : 8
+        };
+
+
+        var contrastAscii = ["@%#+=*^~-_,."];
+
+        var ctx     = canvas.getContext("2d");
+        var _mctx   = _mcanvas.getContext("2d");
+
+        function draw(timestamp) {
+            if (imageLength != imageBox.length) {
+                console.log("Now loading...");
+                window.requestAnimationFrame(draw);
+                return false;
+            };
+
+            if (option.initLoad === false) {
+                option.initLoad = true;
+                console.log(renderBox);
+            };
+
+            //clear
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
+
+            var x = 0;
+            var y = 0;
+
+            for(x=0;x<50;++x) {
+                for(y=0;y<50;++y) {
+                    ctx.fillStyle   = "#fafafa";
+                    ctx.font        = "8px monospace"
+                    ctx.fillText("x", (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                };
+            };
+
+            window.requestAnimationFrame(draw);
+            return true;
+        };
+
+        function _rgbMerge2SpecifiedValue(r, g, b) {
+            return ((255 - r) + (255 - g) + (255 - b) / 3)
+        };
+
+        function _convertAscii2Image(img) {
+            var self = [];
+            var ix = 0;
+            var iy = 0;
+            if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
+                for(ix=0;ix<img.naturalWidth;++ix) {
+                    self[ix] = [];
+                    for(iy=0;iy<img.naturalWidth;++iy) {
+                        self[ix][iy] = [];
+                    };
+                };
+
+                for(ix=0;ix<img.naturalWidth;++ix) {
+                    for(iy=0;iy<img.naturalWidth;++iy) {
+                        self[ix][iy] = _pickaPixel(ix, iy);
+                    };
+                };
+
+            };
+            renderBox.push(self);
+        };
+
+        function _pickaPixel(x, y) {
+            var pixel = ctx.getImageData(x, y, 1, 1);
+            var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
+            return value;
+        };
+
+
+        function _imageLoadHandler_success(e) {
+            if (e.path != undefined) {
+                for(var key in e.path) {
+                    imageBox.push(e.path[key]);
+                    _convertAscii2Image(e.path[key]);
+                };
+            };
+        };
+        function _imageLoadHandler_error() {
+            --imageLength;
+        };
+        function _loadImageData(url) {
+            var image = new Image();
+            image.onload = _imageLoadHandler_success;
+            image.onerror = _imageLoadHandler_error;
+            image.src = url;
+            ++imageLength;
+        };
+
+        function _genScene() {
+
+        };
+
+
+
+        function _getElementPos(element) {
+            return {
+                width   : (element.offsetWidth >= element.clientWidth ? element.clientWidth : element.offsetWidth),
+                height  : (element.offsetHeight >= element.clientHeight ? element.clientHeight : element.offsetHeight)
+            };
+        };
+
+
+
+
+
+
+
+        function _resizeToMaximumSizeOfNode(element) {
+            var def = _getElementPos(parent);
+            if (element != undefined) {
+                // element.width     = def.width+"px";
+                // element.height    = def.height+"px";
+                element.setAttribute("width", def.width+"px");
+                element.setAttribute("height", def.height+"px");
+                option.parentWidth  = def.width;
+                option.parentHeight = def.height;
+            };
+        };
+
+        function _background2black(element) {
+            if (element != undefined) {
+                element.style.backgroundColor = "#000000";
+            };
+        };
+
+        function _nodeIsNoMargins(element) {
+            if (element != undefined) {
+                element.style.marginLeft    = "0px";
+                element.style.marginRight   = "0px";
+                element.style.marginTop     = "0px";
+                element.style.marginBottom  = "0px";
+            };
+        };
+
+        function _nodeIsNoPads(element) {
+            if (element != undefined) {
+                element.style.paddingLeft    = "0px";
+                element.style.paddingRight   = "0px";
+                element.style.paddingTop     = "0px";
+                element.style.paddingBottom  = "0px";
+            };
+        };
+
+
+        function dataLoader() {
+            _loadImageData("../images/ico_nodata.gif");
+        };
+
+        function opening() {
+            _nodeIsNoPads(parent);
+            _nodeIsNoMargins(parent);
+
+            _background2black(canvas);
+            _nodeIsNoPads(canvas);
+            _nodeIsNoMargins(canvas);
+            _resizeToMaximumSizeOfNode(canvas);
+            ctx.setTransform(1,0,0,1,0,0);
+
+            dataLoader();
+
+            parent.appendChild(canvas);
+            window.requestAnimationFrame(draw);
+        };
+
+        function init() {
+            parent = window.document.body;
+            opening();
+        };
+
+        function initEventReAttach() {
+            //window.removeEventListener("load");
+            window.addEventListener("load", function() {
+                init();
+            }, false);
+
+            // window.removeEventListener("resize");
+            window.addEventListener("resize", function() {
+                _resizeToMaximumSizeOfNode(canvas);
+            }, false);
+        };
+
+
+
+
+
+
+
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        initEventReAttach();
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+        /** -------------------------------------------------*/
+    })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"));
+</script>
