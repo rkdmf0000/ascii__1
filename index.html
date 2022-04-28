@@ -17,7 +17,7 @@
         };
 
 
-        var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", "."];
+        var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", ".", " "];
 
         var ctx     = canvas.getContext("2d");
         var _mctx   = _mcanvas.getContext("2d");
@@ -56,7 +56,7 @@
         };
 
         function selectASCII(fff) {
-            var pick = Math.round(normalization(255, 1, fff, 0, 11));
+            var pick = Math.round(normalization(255, 1, fff, 0, 12));
             return (contrastAscii[pick] ? contrastAscii[pick] : ".");
         };
 
