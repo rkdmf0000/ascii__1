@@ -84,7 +84,7 @@
         };
 
         function _rgbMerge2SpecifiedValue(r, g, b) {
-            return (((255 - r) + (255 - g) + (255 - b)) / 3)
+            return Math.floor(((255 - r) + (255 - g) + (255 - b)) / 3);
         };
 
         function _convertAscii2Image(img) {
@@ -140,6 +140,7 @@
             --imageLength;
         };
         function _loadImageData(url) {
+
 
             if (false) {
                 console.log("load");
@@ -236,7 +237,7 @@
 
 
         function dataLoader() {
-            _loadImageData("download.jpg");
+            _loadImageData("./download.jpg");
         };
 
         function opening() {
