@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.0.5");
+        console.log("0.0.0.6");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -57,7 +57,7 @@
 
         function selectASCII(fff) {
             var pick = Math.round(normalization(255, 1, fff, 0, 11));
-            return contrastAscii[pick];
+            return (contrastAscii[pick] ? contrastAscii[pick] : ".");
         };
 
         function draw(timestamp) {
