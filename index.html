@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.0.4");
+        console.log("0.0.0.5);
 
         var imageLength = 0;
         var imageBox    = [];
@@ -77,12 +77,15 @@
 
             var x = 0;
             var y = 0;
-
+            ctx.fillStyle   = "#fafafa";
+            ctx.font        = "8px monospace";
             for(x=0;x<200;++x) {
                 for(y=0;y<200;++y) {
-                    ctx.fillStyle   = "#fafafa";
-                    ctx.font        = "8px monospace"
-                    ctx.fillText(selectASCII(renderBox[x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                    if (renderBox[x]) {
+                        if (renderBox[x][y]) {
+                            ctx.fillText(selectASCII(renderBox[x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                        };
+                    }
                 };
             };
 
