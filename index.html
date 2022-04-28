@@ -62,7 +62,7 @@
 
             if (option.initLoad === false) {
                 option.initLoad = true;
-                console.log(renderBox);
+                // console.log(renderBox);
             };
 
             //clear
@@ -71,8 +71,8 @@
             var x = 0;
             var y = 0;
 
-            for(x=0;x<50;++x) {
-                for(y=0;y<50;++y) {
+            for(x=0;x<200;++x) {
+                for(y=0;y<200;++y) {
                     ctx.fillStyle   = "#fafafa";
                     ctx.font        = "8px monospace"
                     ctx.fillText("x", (x + (x*option.textSpace)), (y + (y*option.textSpace)));
@@ -95,8 +95,6 @@
 
                 clearRect(_mctx);
                 _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
-                console.log(_mctx.getImageData(0, 0, 1, 1));
-
                 
                 for(ix=0;ix<img.naturalWidth;++ix) {
                     self[ix] = [];
@@ -124,60 +122,25 @@
 
 
         function _imageLoadHandler_success(e, type) {
-            if (type != undefined && type == "xhr") {
-                console.log("source : ", e);
-            } else {
-                if (e.path != undefined) {
-                    for(var key in e.path) {
-                        imageBox.push(e.path[key]);
-                        _convertAscii2Image(e.path[key]);
-                    };
+            if (e.path != undefined) {
+                for(var key in e.path) {
+                    imageBox.push(e.path[key]);
+                    _convertAscii2Image(e.path[key]);
                 };
             };
-
         };
         function _imageLoadHandler_error() {
             --imageLength;
         };
         function _loadImageData(url) {
+            var image = new Image();
+        
+            image.onload = _imageLoadHandler_success;
+            image.onerror = _imageLoadHandler_error;
+            image.crossOrigin = "anonymous";
+            image.src = url;
 
-
-            if (false) {
-                console.log("load");
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.responseType = 'blob';
-
-                xhr.onload = function(e) {
-                    if (this.status == 200) {
-                        var blob    = this.response;
-                        var cblob   = null;
-                        img.onload = function(e) {
-                            console.log("s");
-                            window.URL.revokeObjectURL(cblob); // Clean up after yourself.
-                            _imageLoadHandler_success(cblob, "xhr");
-                        };
-                        cblob = window.URL.createObjectURL(blob);
-                    };
-                };
-
-                xhr.error = function() {
-                    console.log("f");
-                    _imageLoadHandler_error();
-                };
-
-                xhr.send();
-
-            } else {
-                var image = new Image();
-            
-                image.onload = _imageLoadHandler_success;
-                image.onerror = _imageLoadHandler_error;
-                image.crossOrigin = "anonymous";
-                image.src = url;
-
-                ++imageLength;
-            };
+            ++imageLength;
         };
 
         function _genScene() {
