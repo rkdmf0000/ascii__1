@@ -1,5 +1,7 @@
-<script>
+<script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
+
+
 
         var imageLength = 0;
         var imageBox    = [];
@@ -7,6 +9,7 @@
         var renderBox   = [];
 
         var option      = {
+            $video          : null,
             initLoad        : false,
             parentWidth     : 0,
             parentHeight    : 0,
@@ -18,6 +21,37 @@
 
         var ctx     = canvas.getContext("2d");
         var _mctx   = _mcanvas.getContext("2d");
+
+
+
+
+        function _createVideoElement() {
+            option.$video           = window.document.createElement("video");
+            option.$video.autoplay  = true;
+            option.$video.srcObject = void(0);
+        };
+
+        function _getVideoAccess() {
+            if ("mediaDevices" in window.navigator) {
+                if (option.$video != null) {
+                    window.navigator.mediaDevices.getUserMedia({video : true}).then(function(streamObject){
+                        option.$video.srcObject = streamObject;
+                    }).catch(function(err){
+                        alert("err - mediaDevices is something wrong!");
+                    });
+                } else {
+                    alert("err - you can't run it before must createVideoElement");
+                };
+            } else {
+                alert("err - mediaDevices is not support on your browser looser");
+            };
+
+        };
+
+        function clearRect(this_ctx) {
+            this_ctx.fillStyle = "#000000";
+            this_ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
+        };
 
         function draw(timestamp) {
             if (imageLength != imageBox.length) {
@@ -32,8 +66,7 @@
             };
 
             //clear
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
+            clearRect(ctx);
 
             var x = 0;
             var y = 0;
@@ -51,7 +84,7 @@
         };
 
         function _rgbMerge2SpecifiedValue(r, g, b) {
-            return ((255 - r) + (255 - g) + (255 - b) / 3)
+            return (((255 - r) + (255 - g) + (255 - b)) / 3)
         };
 
         function _convertAscii2Image(img) {
@@ -59,15 +92,21 @@
             var ix = 0;
             var iy = 0;
             if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
+
+                clearRect(_mctx);
+                _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+                console.log(_mctx.getImageData(0, 0, 1, 1));
+
+                
                 for(ix=0;ix<img.naturalWidth;++ix) {
                     self[ix] = [];
-                    for(iy=0;iy<img.naturalWidth;++iy) {
+                    for(iy=0;iy<img.naturalHeight;++iy) {
                         self[ix][iy] = [];
                     };
                 };
 
                 for(ix=0;ix<img.naturalWidth;++ix) {
-                    for(iy=0;iy<img.naturalWidth;++iy) {
+                    for(iy=0;iy<img.naturalHeight;++iy) {
                         self[ix][iy] = _pickaPixel(ix, iy);
                     };
                 };
@@ -76,30 +115,68 @@
             renderBox.push(self);
         };
 
+
         function _pickaPixel(x, y) {
-            var pixel = ctx.getImageData(x, y, 1, 1);
+            var pixel = _mctx.getImageData(x, y, 1, 1);
             var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
             return value;
         };
 
 
-        function _imageLoadHandler_success(e) {
-            if (e.path != undefined) {
-                for(var key in e.path) {
-                    imageBox.push(e.path[key]);
-                    _convertAscii2Image(e.path[key]);
+        function _imageLoadHandler_success(e, type) {
+            if (type != undefined && type == "xhr") {
+                console.log("source : ", e);
+            } else {
+                if (e.path != undefined) {
+                    for(var key in e.path) {
+                        imageBox.push(e.path[key]);
+                        _convertAscii2Image(e.path[key]);
+                    };
                 };
             };
+
         };
         function _imageLoadHandler_error() {
             --imageLength;
         };
         function _loadImageData(url) {
-            var image = new Image();
-            image.onload = _imageLoadHandler_success;
-            image.onerror = _imageLoadHandler_error;
-            image.src = url;
-            ++imageLength;
+
+            if (false) {
+                console.log("load");
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
+
+                xhr.onload = function(e) {
+                    if (this.status == 200) {
+                        var blob    = this.response;
+                        var cblob   = null;
+                        img.onload = function(e) {
+                            console.log("s");
+                            window.URL.revokeObjectURL(cblob); // Clean up after yourself.
+                            _imageLoadHandler_success(cblob, "xhr");
+                        };
+                        cblob = window.URL.createObjectURL(blob);
+                    };
+                };
+
+                xhr.error = function() {
+                    console.log("f");
+                    _imageLoadHandler_error();
+                };
+
+                xhr.send();
+
+            } else {
+                var image = new Image();
+            
+                image.onload = _imageLoadHandler_success;
+                image.onerror = _imageLoadHandler_error;
+                image.crossOrigin = "anonymous";
+                image.src = url;
+
+                ++imageLength;
+            };
         };
 
         function _genScene() {
@@ -159,7 +236,7 @@
 
 
         function dataLoader() {
-            _loadImageData("../frame1.gif");
+            _loadImageData("download.jpg");
         };
 
         function opening() {
@@ -170,7 +247,11 @@
             _nodeIsNoPads(canvas);
             _nodeIsNoMargins(canvas);
             _resizeToMaximumSizeOfNode(canvas);
-            ctx.setTransform(1,0,0,1,0,0);
+            //ctx.setTransform(1,0,0,1,0,0);
+
+
+
+            _resizeToMaximumSizeOfNode(_mcanvas);
 
             dataLoader();
 
@@ -192,6 +273,7 @@
             // window.removeEventListener("resize");
             window.addEventListener("resize", function() {
                 _resizeToMaximumSizeOfNode(canvas);
+                _resizeToMaximumSizeOfNode(_mcanvas);
             }, false);
         };
 
