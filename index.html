@@ -73,13 +73,12 @@
             };
 
             if ((timestamp - option.frameStock) <= 1000) {
+                ++option.fps;
                 window.requestAnimationFrame(draw);
                 return false;
-            } else {
-                option.fps = 0;
-            };
+            }; 
+            option.fps = 0;
             option.frameStock = timestamp;
-            ++option.fps;
             
             if (option.initLoad === false) {
                 option.initLoad = true;
