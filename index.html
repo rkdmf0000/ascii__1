@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.1.1");
+        console.log("0.0.1.2");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -89,11 +89,6 @@
             //clear
             clearRect(ctx);
             
-            ctx.fillStyle   = "#fafafa";
-            ctx.font        = "14px monospace";
-            ctx.fillText("FPS : " + option.fps, 0, 0);
-            
-            
             var i = 0;
             var x = 0;
             var y = 0;
@@ -110,7 +105,11 @@
                     };
                 };
             };
-
+            
+            ctx.fillStyle   = "#fafafa";
+            ctx.font        = "14px monospace";
+            ctx.fillText("FPS : " + option.fps, 0, 0);
+            
             window.requestAnimationFrame(draw);
             return true;
         };
