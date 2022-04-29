@@ -230,6 +230,15 @@
             };
         };
 
+        function _nodeIsFixedStyle(element) {
+            if (element != undefined) {
+                element.style.position = "fixed";
+                element.style.left     = "0";
+                element.style.right    = "0";
+                element.style.top      = "0";
+                element.style.bottom   = "0";
+            };
+        };
 
         function dataLoader() {
 
@@ -243,9 +252,9 @@
             _background2black(canvas);
             _nodeIsNoPads(canvas);
             _nodeIsNoMargins(canvas);
+            _nodeIsFixedStyle(canvas);
             _resizeToMaximumSizeOfNode(canvas);
             //ctx.setTransform(1,0,0,1,0,0);
-
 
 
             _resizeToMaximumSizeOfNode(_mcanvas);
