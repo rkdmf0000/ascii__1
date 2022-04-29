@@ -73,9 +73,10 @@
             };
 
             if ((timestamp - option.frameStock) <= 1000) {
-                option.fps = 0;
                 window.requestAnimationFrame(draw);
                 return false;
+            } else {
+                option.fps = 0;
             };
             option.frameStock = timestamp;
             ++option.fps;
