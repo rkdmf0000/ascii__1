@@ -13,7 +13,12 @@
             initLoad        : false,
             parentWidth     : 0,
             parentHeight    : 0,
-            textSpace       : 8
+            textSpace       : 8,
+            frameStock      : 0,
+            frameLine       : 0,
+            frameTarget     : 60,
+            frameInterval   : 10,
+            fps             : 0
         };
 
 
@@ -67,6 +72,14 @@
                 return false;
             };
 
+            if ((timestamp - option.frameStock) >= 1000) {
+                option.fps = 0;
+                window.requestAnimationFrame(draw);
+                return false;
+            };
+            option.frameStock = timestamp;
+            ++option.fps;
+            
             if (option.initLoad === false) {
                 option.initLoad = true;
                 console.log(renderBox);
