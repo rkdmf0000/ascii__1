@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.1.0");
+        console.log("0.0.1.1");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -88,6 +88,10 @@
 
             //clear
             clearRect(ctx);
+            
+            ctx.fillText("FPS : " + option.fps, 0, 0);
+            
+            
             var i = 0;
             var x = 0;
             var y = 0;
