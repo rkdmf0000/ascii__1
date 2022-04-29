@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.1.3");
+        console.log("0.0.1.4");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -77,8 +77,6 @@
                 window.requestAnimationFrame(draw);
                 return false;
             }; 
-            option.fps = 0;
-            option.frameStock = timestamp;
             
             if (option.initLoad === false) {
                 option.initLoad = true;
@@ -110,6 +108,9 @@
             ctx.fillText("FPS : " + option.fps, 10, 50);
             ctx.fillText("ok good", 100, 200);
             
+            
+            option.fps = 0;
+            option.frameStock = timestamp;
             window.requestAnimationFrame(draw);
             return true;
         };
