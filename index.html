@@ -15,7 +15,7 @@
     <body>
         
         <div class="panel-wrap">
-            <button id="BTN_ACCESS_VIDEO">GET STREAM ACCESS AND CONVERT CAM</button>
+            <button id="BTN_ACCESS_VIDEO"></button>
         </div>
 
         <script type="text/javascript">
@@ -60,7 +60,6 @@
                 };
 
                 function _removeVideoElement() {
-                    console.log(option.$video.srcObject);
                     if (option.$video != null) {
                         try {
                             option.$video.srcObject.getTracks().forEach(function(track) {
@@ -81,6 +80,18 @@
                     option.$video           = window.document.createElement("video");
                     option.$video.autoplay  = true;
                     option.$video.srcObject = void(0);
+
+                    option.$video.addEventListener('play', function () {
+                        var $this = this;
+                        (function loop() {
+                            if (!$this.paused && !$this.ended) {
+                                ctx.drawImage($this, 0, 0);
+                                setTimeout(loop, 1000 / 30);
+                            }
+                        })();
+                    }, 0);
+
+
                 };
         
                 function _getVideoAccess() {
@@ -342,6 +353,7 @@
                 };
 
                 function _initEventAttach() {
+                    getElement().BTN.VIDEO_ACCESS.innerHTML = "GET STREAM ACCESS AND CONVERT CAM TOGGLE";
                     getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
                         if (option.$video != null) {
                             _removeVideoElement();
