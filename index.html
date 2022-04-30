@@ -63,7 +63,9 @@
                     console.log(option.$video.srcObject);
                     if (option.$video != null) {
                         try {
-                            option.$video.srcObject.stop();
+                            option.$video.srcObject.getTracks().forEach(function(track) {
+                                track.stop();
+                            });
                             delete option.$video;
                             option.$video = null;
                         } catch(e) {
