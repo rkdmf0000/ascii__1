@@ -1,7 +1,7 @@
 <script type="text/javascript">
     ;(function(parent, canvas, _mcanvas) {
 
-        console.log("0.0.1.4");
+        console.log("0.0.1.5");
 
         var imageLength = 0;
         var imageBox    = [];
@@ -111,9 +111,7 @@
 
             if ((timestamp - option.frameStock) <= 1000) {
                 ++option.fps;
-                __textDrawInSleep();
-                window.requestAnimationFrame(draw);
-                return false;
+                // __textDrawInSleep();
             }; 
             
             if (option.initLoad === false) {
