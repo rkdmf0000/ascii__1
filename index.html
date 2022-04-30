@@ -82,9 +82,11 @@
                     option.$video.srcObject = void(0);
 
                     option.$video.addEventListener('play', function () {
+                        console.log("play!");
                         var $this = this;
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
+                                console.log("draw!");
                                 ctx.drawImage($this, 0, 0);
                                 setTimeout(loop, 1000 / 30);
                             }
@@ -168,6 +170,7 @@
                     if ((timestamp - option.frameStock) <= 1000) {
                         ++option.fps;
                         // __textDrawInSleep();
+                        //return;
                     };
                     
                     if (option.initLoad === false) {
