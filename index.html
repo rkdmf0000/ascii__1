@@ -65,30 +65,25 @@
             return (contrastAscii[pick] ? contrastAscii[pick] : ".");
         };
 
-        function draw(timestamp) {
-            if (imageLength != imageBox.length) {
-                console.log("Now loading...");
-                window.requestAnimationFrame(draw);
-                return false;
-            };
 
-            if ((timestamp - option.frameStock) <= 1000) {
-                ++option.fps;
-                ctx.fillStyle   = "#fafafa";
-                ctx.font        = "14px monospace";
-                ctx.fillText("[SLEEP !!]", 100, 230);
-                window.requestAnimationFrame(draw);
-                return false;
-            }; 
-            
-            if (option.initLoad === false) {
-                option.initLoad = true;
-                console.log(renderBox);
-            };
 
-            //clear
-            clearRect(ctx);
+        function __textDrawEtc() {
             
+            ctx.fillStyle   = "#fafafa";
+            ctx.font        = "14px monospace";
+            ctx.fillText("FPS : " + option.fps, 100, 210);
+            ctx.fillText("ok good", 100, 200);
+            
+            
+        };
+
+        function __textDrawInSleep() {
+            ctx.fillStyle   = "#fafafa";
+            ctx.font        = "14px monospace";
+            ctx.fillText("[SLEEP !!]", 100, 230);
+        };
+
+        function __drawGrid() {
             var i = 0;
             var x = 0;
             var y = 0;
@@ -105,12 +100,31 @@
                     };
                 };
             };
+        };
+
+        function draw(timestamp) {
+            if (imageLength != imageBox.length) {
+                console.log("Now loading...");
+                window.requestAnimationFrame(draw);
+                return false;
+            };
+
+            if ((timestamp - option.frameStock) <= 1000) {
+                ++option.fps;
+                __textDrawInSleep();
+                window.requestAnimationFrame(draw);
+                return false;
+            }; 
             
-            ctx.fillStyle   = "#fafafa";
-            ctx.font        = "14px monospace";
-            ctx.fillText("FPS : " + option.fps, 100, 210);
-            ctx.fillText("ok good", 100, 200);
-            
+            if (option.initLoad === false) {
+                option.initLoad = true;
+                console.log(renderBox);
+            };
+
+            //clear
+            clearRect(ctx);
+            __drawGrid();
+            __textDrawEtc();
             
             option.fps = 0;
             option.frameStock = timestamp;
