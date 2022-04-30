@@ -4,11 +4,19 @@
         <title>| | | | | |</title>
         <meta charset="UTF-8">
         <style>
+            *{position:relative;box-sizing: border-box;-webkit-box-sizing: border-box;}
             html, body{position:fixed;top:0;bottom:0;left:0;right:0;}
+
+
+            .panel-wrap{width:100%;padding-top:6px;padding-bottom:6px;padding-left:6px;padding-right:6px;}
         </style>
     </head>
     <body>
-        <button>xxx</button>
+        
+        <div class="panel-wrap">
+            <button id="BTN_ACCESS_VIDEO">GET STREAM ACCESS AND CONVERT CAM</button>
+        </div>
+
         <script type="text/javascript">
             ;(function(parent, canvas, _mcanvas) {
         
@@ -43,6 +51,13 @@
                 };
         
         
+                function getElement() {
+                    var $ = {};
+                    $["BTN"] = {}
+                    $["BTN"]["VIDEO_ACCESS"] = window.document.getElementById("BTN_ACCESS_VIDEO");
+                    return $;
+                };
+
                 function _removeVideoElement() {
                     if (option.$video != null) {
                         delete option.$video;
@@ -297,8 +312,14 @@
         
                     _resizeToMaximumSizeOfNode(_mcanvas);
         
+                    //data load for convertion
                     dataLoader();
         
+
+
+                    
+
+
                     parent.appendChild(canvas);
                     window.requestAnimationFrame(draw);
                 };
@@ -306,6 +327,15 @@
                 function init() {
                     parent = window.document.body;
                     opening();
+                };
+
+                function _initEventAttach() {
+                    getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
+                        if (confirm("YOU OK?")) {
+                            _createVideoElement();
+                            _getVideoAccess();
+                        };
+                    });
                 };
         
                 function initEventReAttach() {
