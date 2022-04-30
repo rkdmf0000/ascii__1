@@ -29,16 +29,16 @@
                 var renderBox   = [];
         
                 var option      = {
-                    $video          : null,
-                    initLoad        : false,
-                    parentWidth     : 0,
-                    parentHeight    : 0,
-                    textSpace       : 8,
-                    frameStock      : 0,
-                    frameLine       : 0,
-                    frameTarget     : 60,
-                    frameInterval   : 10,
-                    fps             : 0
+                    $video              : null,
+                    initLoad            : false,
+                    parentWidth         : 0,
+                    parentHeight        : 0,
+                    textSpace           : 8,
+                    frameStock          : 0,
+                    frameLine           : 0,
+                    frameTarget         : 60,
+                    frameInterval       : 10,
+                    fps                 : 0
                 };
         
         
@@ -61,6 +61,12 @@
 
                 function _removeVideoElement() {
                     if (option.$video != null) {
+                        try {
+                            option.$video.srcObject.stop();
+                        } catch(e) {
+                            alert("err - streamObject stop is failed");
+                        };
+                        
                         delete option.$video;
                         option.$video = null;
                     } else {
