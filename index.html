@@ -22,6 +22,7 @@
             ;(function(parent, canvas, _mcanvas, _canvasBuffer) {
         
                 console.log("0.0.1.5");
+
         
                 var imageLength = 0;
                 var imageBox    = [];
@@ -48,6 +49,10 @@
                 var _mctx   = _mcanvas.getContext("2d");
                 var _bctx   = _canvasBuffer.getContext("2d");
         
+                console.log("canvas : ", canvas, "ctx : ", ctx);
+                console.log("canvas : ", _mcanvas, "ctx : ", _mctx);
+                console.log("canvas : ", _canvasBuffer, "ctx : ", _bctx);
+
                 function normalization(v_min, v_max, value, n_min, n_max) {
                     return (n_max - n_min) * (value - v_min) / (v_max - v_min) + n_min;
                 };
