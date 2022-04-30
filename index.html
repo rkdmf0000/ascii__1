@@ -19,7 +19,7 @@
         </div>
 
         <script type="text/javascript">
-            ;(function(parent, canvas, _mcanvas) {
+            ;(function(parent, canvas, _mcanvas, _canvasBuffer) {
         
                 console.log("0.0.1.5");
         
@@ -46,6 +46,7 @@
         
                 var ctx     = canvas.getContext("2d");
                 var _mctx   = _mcanvas.getContext("2d");
+                var _bctx   = _canvasBuffer.getContext("2d");
         
                 function normalization(v_min, v_max, value, n_min, n_max) {
                     return (n_max - n_min) * (value - v_min) / (v_max - v_min) + n_min;
@@ -83,12 +84,11 @@
                     option.$video.srcObject = void(0);
 
                     option.$video.addEventListener('play', function () {
-                        console.log("play!");
                         var $this = this;
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
-                                console.log("draw!");
-                                ctx.drawImage($this, 0, 0);
+                                clearRect(_mcanvas);
+                                _mcanvas.drawImage($this, 0, 0);
                                 setTimeout(loop, 1000 / 30);
                             }
                         })();
@@ -128,32 +128,32 @@
         
                 function __textDrawEtc() {
                     
-                    ctx.fillStyle   = "#fafafa";
-                    ctx.font        = "14px monospace";
-                    ctx.fillText("FPS : " + option.fps, 100, 210);
-                    ctx.fillText("ok good", 100, 200);
+                    _bctx.fillStyle   = "#fafafa";
+                    _bctx.font        = "14px monospace";
+                    _bctx.fillText("FPS : " + option.fps, 100, 210);
+                    _bctx.fillText("ok good", 100, 200);
                     
                     
                 };
         
                 function __textDrawInSleep() {
-                    ctx.fillStyle   = "#fafafa";
-                    ctx.font        = "14px monospace";
-                    ctx.fillText("[SLEEP !!]", 100, 230);
+                    _bctx.fillStyle   = "#fafafa";
+                    _bctx.font        = "14px monospace";
+                    _bctx.fillText("[SLEEP !!]", 100, 230);
                 };
         
                 function __drawGrid() {
                     var i = 0;
                     var x = 0;
                     var y = 0;
-                    ctx.fillStyle   = "#fafafa";
-                    ctx.font        = "8px monospace";
+                    _bctx.fillStyle   = "#fafafa";
+                    _bctx.font        = "8px monospace";
                     for(i=0;i<renderBox.length;++i) {
                         for(x=0;x<200;++x) {
                             for(y=0;y<200;++y) {
                                 if (renderBox[i][x]) {
                                     if (renderBox[i][x][y]) {
-                                        ctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                                        _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
                                     };
                                 }
                             };
@@ -181,9 +181,10 @@
         
                     //clear
                     clearRect(ctx);
+                    clearRect(_bctx);
                     __drawGrid();
                     __textDrawEtc();
-        
+                    ctx.drawImage(_bctx, 0, 0);
         
                     option.fps = 0;
                     option.frameStock = timestamp;
@@ -338,6 +339,7 @@
         
         
                     _resizeToMaximumSizeOfNode(_mcanvas);
+                    _resizeToMaximumSizeOfNode(_canvasBuffer);
         
                     //data load for convertion
                     dataLoader();
@@ -405,7 +407,7 @@
                 /** -------------------------------------------------*/
                 /** -------------------------------------------------*/
                 /** -------------------------------------------------*/
-            })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"));
+            })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"), window.document.createElement("canvas"));
         </script>
         
     </body>
