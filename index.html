@@ -1,322 +1,345 @@
-<script type="text/javascript">
-    ;(function(parent, canvas, _mcanvas) {
-
-        console.log("0.0.1.5");
-
-        var imageLength = 0;
-        var imageBox    = [];
-
-        var renderBox   = [];
-
-        var option      = {
-            $video          : null,
-            initLoad        : false,
-            parentWidth     : 0,
-            parentHeight    : 0,
-            textSpace       : 8,
-            frameStock      : 0,
-            frameLine       : 0,
-            frameTarget     : 60,
-            frameInterval   : 10,
-            fps             : 0
-        };
-
-
-        var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", ".", " "];
-
-        var ctx     = canvas.getContext("2d");
-        var _mctx   = _mcanvas.getContext("2d");
-
-        function normalization(v_min, v_max, value, n_min, n_max) {
-            return (n_max - n_min) * (value - v_min) / (v_max - v_min) + n_min;
-        };
-
-
-        function _createVideoElement() {
-            option.$video           = window.document.createElement("video");
-            option.$video.autoplay  = true;
-            option.$video.srcObject = void(0);
-        };
-
-        function _getVideoAccess() {
-            if ("mediaDevices" in window.navigator) {
-                if (option.$video != null) {
-                    window.navigator.mediaDevices.getUserMedia({video : true}).then(function(streamObject){
-                        option.$video.srcObject = streamObject;
-                    }).catch(function(err){
-                        alert("err - mediaDevices is something wrong!");
-                    });
-                } else {
-                    alert("err - you can't run it before must createVideoElement");
-                };
-            } else {
-                alert("err - mediaDevices is not support on your browser looser");
-            };
-
-        };
-
-        function clearRect(this_ctx) {
-            this_ctx.fillStyle = "#000000";
-            this_ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
-        };
-
-        function selectASCII(fff) {
-            var pick = Math.round(normalization(255, 1, fff, 0, 12));
-            return (contrastAscii[pick] ? contrastAscii[pick] : ".");
-        };
-
-
-
-        function __textDrawEtc() {
-            
-            ctx.fillStyle   = "#fafafa";
-            ctx.font        = "14px monospace";
-            ctx.fillText("FPS : " + option.fps, 100, 210);
-            ctx.fillText("ok good", 100, 200);
-            
-            
-        };
-
-        function __textDrawInSleep() {
-            ctx.fillStyle   = "#fafafa";
-            ctx.font        = "14px monospace";
-            ctx.fillText("[SLEEP !!]", 100, 230);
-        };
-
-        function __drawGrid() {
-            var i = 0;
-            var x = 0;
-            var y = 0;
-            ctx.fillStyle   = "#fafafa";
-            ctx.font        = "8px monospace";
-            for(i=0;i<renderBox.length;++i) {
-                for(x=0;x<200;++x) {
-                    for(y=0;y<200;++y) {
-                        if (renderBox[i][x]) {
-                            if (renderBox[i][x][y]) {
-                                ctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
-                            };
-                        }
-                    };
-                };
-            };
-        };
-
-        function draw(timestamp) {
-            if (imageLength != imageBox.length) {
-                console.log("Now loading...");
-                window.requestAnimationFrame(draw);
-                return false;
-            };
-
-            if ((timestamp - option.frameStock) <= 1000) {
-                ++option.fps;
-                // __textDrawInSleep();
-            }; 
-            
-            if (option.initLoad === false) {
-                option.initLoad = true;
-                console.log(renderBox);
-            };
-
-            //clear
-            clearRect(ctx);
-            __drawGrid();
-            __textDrawEtc();
-            
-            option.fps = 0;
-            option.frameStock = timestamp;
-            window.requestAnimationFrame(draw);
-            return true;
-        };
-
-        function _rgbMerge2SpecifiedValue(r, g, b) {
-            return Math.floor(((255 - r) + (255 - g) + (255 - b)) / 3);
-        };
-
-        function _convertAscii2Image(img) {
-            var self = [];
-            var ix = 0;
-            var iy = 0;
-            if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
-
-                clearRect(_mctx);
-                _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
-                
-                for(ix=0;ix<img.naturalWidth;++ix) {
-                    self[ix] = [];
-                    for(iy=0;iy<img.naturalHeight;++iy) {
-                        self[ix][iy] = 0;
-                    };
-                };
-
-                for(ix=0;ix<img.naturalWidth;++ix) {
-                    for(iy=0;iy<img.naturalHeight;++iy) {
-                        self[ix][iy] = _pickaPixel(ix, iy);
-                    };
-                };
-
-            };
-            renderBox.push(self);
-        };
-
-
-        function _pickaPixel(x, y) {
-            var pixel = _mctx.getImageData(x, y, 1, 1);
-            var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
-            return value;
-        };
-
-
-        function _imageLoadHandler_success(e, type) {
-            if (e.path != undefined) {
-                for(var key in e.path) {
-                    imageBox.push(e.path[key]);
-                    _convertAscii2Image(e.path[key]);
-                };
-            };
-        };
-        function _imageLoadHandler_error() {
-            --imageLength;
-        };
-        function _loadImageData(url) {
-            var image = new Image();
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>| | | | | |</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <button>xxx</button>
+        <script type="text/javascript">
+            ;(function(parent, canvas, _mcanvas) {
         
-            image.onload = _imageLoadHandler_success;
-            image.onerror = _imageLoadHandler_error;
-            image.crossOrigin = "anonymous";
-            image.src = url;
-
-            ++imageLength;
-        };
-
-        function _genScene() {
-
-        };
-
-
-
-        function _getElementPos(element) {
-            return {
-                width   : (element.offsetWidth >= element.clientWidth ? element.clientWidth : element.offsetWidth),
-                height  : (element.offsetHeight >= element.clientHeight ? element.clientHeight : element.offsetHeight)
-            };
-        };
-
-
-
-
-
-
-
-        function _resizeToMaximumSizeOfNode(element) {
-            var def = _getElementPos(parent);
-            if (element != undefined) {
-                // element.width     = def.width+"px";
-                // element.height    = def.height+"px";
-                element.setAttribute("width", def.width+"px");
-                element.setAttribute("height", def.height+"px");
-                option.parentWidth  = def.width;
-                option.parentHeight = def.height;
-            };
-        };
-
-        function _background2black(element) {
-            if (element != undefined) {
-                element.style.backgroundColor = "#000000";
-            };
-        };
-
-        function _nodeIsNoMargins(element) {
-            if (element != undefined) {
-                element.style.marginLeft    = "0px";
-                element.style.marginRight   = "0px";
-                element.style.marginTop     = "0px";
-                element.style.marginBottom  = "0px";
-            };
-        };
-
-        function _nodeIsNoPads(element) {
-            if (element != undefined) {
-                element.style.paddingLeft    = "0px";
-                element.style.paddingRight   = "0px";
-                element.style.paddingTop     = "0px";
-                element.style.paddingBottom  = "0px";
-            };
-        };
-
-        function _nodeIsFixedStyle(element) {
-            if (element != undefined) {
-                element.style.position = "fixed";
-                element.style.left     = "0";
-                element.style.right    = "0";
-                element.style.top      = "0";
-                element.style.bottom   = "0";
-            };
-        };
-
-        function dataLoader() {
-
-            _loadImageData("./download.jpg");
-        };
-
-        function opening() {
-            _nodeIsNoPads(parent);
-            _nodeIsNoMargins(parent);
-
-            _background2black(canvas);
-            _nodeIsNoPads(canvas);
-            _nodeIsNoMargins(canvas);
-            _nodeIsFixedStyle(canvas);
-            _resizeToMaximumSizeOfNode(canvas);
-            //ctx.setTransform(1,0,0,1,0,0);
-
-
-            _resizeToMaximumSizeOfNode(_mcanvas);
-
-            dataLoader();
-
-            parent.appendChild(canvas);
-            window.requestAnimationFrame(draw);
-        };
-
-        function init() {
-            parent = window.document.body;
-            opening();
-        };
-
-        function initEventReAttach() {
-            //window.removeEventListener("load");
-            window.addEventListener("load", function() {
-                init();
-            }, false);
-
-            // window.removeEventListener("resize");
-            window.addEventListener("resize", function() {
-                _resizeToMaximumSizeOfNode(canvas);
-                _resizeToMaximumSizeOfNode(_mcanvas);
-            }, false);
-        };
-
-
-
-
-
-
-
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        initEventReAttach();
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-        /** -------------------------------------------------*/
-    })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"));
-</script>
+                console.log("0.0.1.5");
+        
+                var imageLength = 0;
+                var imageBox    = [];
+        
+                var renderBox   = [];
+        
+                var option      = {
+                    $video          : null,
+                    initLoad        : false,
+                    parentWidth     : 0,
+                    parentHeight    : 0,
+                    textSpace       : 8,
+                    frameStock      : 0,
+                    frameLine       : 0,
+                    frameTarget     : 60,
+                    frameInterval   : 10,
+                    fps             : 0
+                };
+        
+        
+                var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", ".", " "];
+        
+                var ctx     = canvas.getContext("2d");
+                var _mctx   = _mcanvas.getContext("2d");
+        
+                function normalization(v_min, v_max, value, n_min, n_max) {
+                    return (n_max - n_min) * (value - v_min) / (v_max - v_min) + n_min;
+                };
+        
+        
+                function _removeVideoElement() {
+                    if (option.$video != null) {
+                        delete option.$video;
+                        option.$video = null;
+                    } else {
+                        alert("err - _removeVideoElement"); 
+                    };
+        
+                };
+        
+                function _createVideoElement() {
+                    option.$video           = window.document.createElement("video");
+                    option.$video.autoplay  = true;
+                    option.$video.srcObject = void(0);
+                };
+        
+                function _getVideoAccess() {
+                    if ("mediaDevices" in window.navigator) {
+                        if (option.$video != null) {
+                            window.navigator.mediaDevices.getUserMedia({video : true}).then(function(streamObject){
+                                option.$video.srcObject = streamObject;
+                            }).catch(function(err){
+                                alert("err - mediaDevices is something wrong!");
+                            });
+                        } else {
+                            alert("err - you can't run it before must createVideoElement");
+                        };
+                    } else {
+                        alert("err - mediaDevices is not support on your browser looser");
+                    };
+        
+                };
+        
+                function clearRect(this_ctx) {
+                    this_ctx.fillStyle = "#000000";
+                    this_ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
+                };
+        
+                function selectASCII(fff) {
+                    var pick = Math.round(normalization(255, 1, fff, 0, 12));
+                    return (contrastAscii[pick] ? contrastAscii[pick] : ".");
+                };
+        
+        
+        
+                function __textDrawEtc() {
+                    
+                    ctx.fillStyle   = "#fafafa";
+                    ctx.font        = "14px monospace";
+                    ctx.fillText("FPS : " + option.fps, 100, 210);
+                    ctx.fillText("ok good", 100, 200);
+                    
+                    
+                };
+        
+                function __textDrawInSleep() {
+                    ctx.fillStyle   = "#fafafa";
+                    ctx.font        = "14px monospace";
+                    ctx.fillText("[SLEEP !!]", 100, 230);
+                };
+        
+                function __drawGrid() {
+                    var i = 0;
+                    var x = 0;
+                    var y = 0;
+                    ctx.fillStyle   = "#fafafa";
+                    ctx.font        = "8px monospace";
+                    for(i=0;i<renderBox.length;++i) {
+                        for(x=0;x<200;++x) {
+                            for(y=0;y<200;++y) {
+                                if (renderBox[i][x]) {
+                                    if (renderBox[i][x][y]) {
+                                        ctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                                    };
+                                }
+                            };
+                        };
+                    };
+                };
+        
+                function draw(timestamp) {
+                    if (imageLength != imageBox.length) {
+                        console.log("Now loading...");
+                        window.requestAnimationFrame(draw);
+                        return false;
+                    };
+        
+                    if ((timestamp - option.frameStock) <= 1000) {
+                        ++option.fps;
+                        // __textDrawInSleep();
+                    };
+                    
+                    if (option.initLoad === false) {
+                        option.initLoad = true;
+                        console.log(renderBox);
+                    };
+        
+                    //clear
+                    clearRect(ctx);
+                    __drawGrid();
+                    __textDrawEtc();
+        
+        
+                    option.fps = 0;
+                    option.frameStock = timestamp;
+        
+                    window.requestAnimationFrame(draw);
+                    return true;
+                };
+        
+                function _rgbMerge2SpecifiedValue(r, g, b) {
+                    return Math.floor(((255 - r) + (255 - g) + (255 - b)) / 3);
+                };
+        
+                function _convertAscii2Image(img) {
+                    var self = [];
+                    var ix = 0;
+                    var iy = 0;
+                    if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
+        
+                        clearRect(_mctx);
+                        _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+                        
+                        for(ix=0;ix<img.naturalWidth;++ix) {
+                            self[ix] = [];
+                            for(iy=0;iy<img.naturalHeight;++iy) {
+                                self[ix][iy] = 0;
+                            };
+                        };
+        
+                        for(ix=0;ix<img.naturalWidth;++ix) {
+                            for(iy=0;iy<img.naturalHeight;++iy) {
+                                self[ix][iy] = _pickaPixel(ix, iy);
+                            };
+                        };
+        
+                    };
+                    renderBox.push(self);
+                };
+        
+        
+                function _pickaPixel(x, y) {
+                    var pixel = _mctx.getImageData(x, y, 1, 1);
+                    var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
+                    return value;
+                };
+        
+        
+                function _imageLoadHandler_success(e, type) {
+                    if (e.path != undefined) {
+                        for(var key in e.path) {
+                            imageBox.push(e.path[key]);
+                            _convertAscii2Image(e.path[key]);
+                        };
+                    };
+                };
+                function _imageLoadHandler_error() {
+                    --imageLength;
+                };
+                function _loadImageData(url) {
+                    var image = new Image();
+                
+                    image.onload = _imageLoadHandler_success;
+                    image.onerror = _imageLoadHandler_error;
+                    image.crossOrigin = "anonymous";
+                    image.src = url;
+        
+                    ++imageLength;
+                };
+        
+                function _genScene() {
+        
+                };
+        
+        
+        
+                function _getElementPos(element) {
+                    return {
+                        width   : (element.offsetWidth >= element.clientWidth ? element.clientWidth : element.offsetWidth),
+                        height  : (element.offsetHeight >= element.clientHeight ? element.clientHeight : element.offsetHeight)
+                    };
+                };
+        
+        
+        
+        
+        
+        
+        
+                function _resizeToMaximumSizeOfNode(element) {
+                    var def = _getElementPos(parent);
+                    if (element != undefined) {
+                        // element.width     = def.width+"px";
+                        // element.height    = def.height+"px";
+                        element.setAttribute("width", def.width+"px");
+                        element.setAttribute("height", def.height+"px");
+                        option.parentWidth  = def.width;
+                        option.parentHeight = def.height;
+                    };
+                };
+        
+                function _background2black(element) {
+                    if (element != undefined) {
+                        element.style.backgroundColor = "#000000";
+                    };
+                };
+        
+                function _nodeIsNoMargins(element) {
+                    if (element != undefined) {
+                        element.style.marginLeft    = "0px";
+                        element.style.marginRight   = "0px";
+                        element.style.marginTop     = "0px";
+                        element.style.marginBottom  = "0px";
+                    };
+                };
+        
+                function _nodeIsNoPads(element) {
+                    if (element != undefined) {
+                        element.style.paddingLeft    = "0px";
+                        element.style.paddingRight   = "0px";
+                        element.style.paddingTop     = "0px";
+                        element.style.paddingBottom  = "0px";
+                    };
+                };
+        
+                function _nodeIsFixedStyle(element) {
+                    if (element != undefined) {
+                        element.style.position = "fixed";
+                        element.style.left     = "0";
+                        element.style.right    = "0";
+                        element.style.top      = "0";
+                        element.style.bottom   = "0";
+                    };
+                };
+        
+                function dataLoader() {
+        
+                    _loadImageData("./download.jpg");
+                };
+        
+                function opening() {
+                    _nodeIsNoPads(parent);
+                    _nodeIsNoMargins(parent);
+        
+                    _background2black(canvas);
+                    _nodeIsNoPads(canvas);
+                    _nodeIsNoMargins(canvas);
+                    _nodeIsFixedStyle(canvas);
+                    _resizeToMaximumSizeOfNode(canvas);
+                    //ctx.setTransform(1,0,0,1,0,0);
+        
+        
+                    _resizeToMaximumSizeOfNode(_mcanvas);
+        
+                    dataLoader();
+        
+                    parent.appendChild(canvas);
+                    window.requestAnimationFrame(draw);
+                };
+        
+                function init() {
+                    parent = window.document.body;
+                    opening();
+                };
+        
+                function initEventReAttach() {
+                    //window.removeEventListener("load");
+                    window.addEventListener("load", function() {
+                        init();
+                    }, false);
+        
+                    // window.removeEventListener("resize");
+                    window.addEventListener("resize", function() {
+                        _resizeToMaximumSizeOfNode(canvas);
+                        _resizeToMaximumSizeOfNode(_mcanvas);
+                    }, false);
+                };
+        
+        
+        
+        
+        
+        
+        
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                initEventReAttach();
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+                /** -------------------------------------------------*/
+            })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"));
+        </script>
+        
+    </body>
+</html>
