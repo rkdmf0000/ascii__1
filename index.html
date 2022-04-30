@@ -335,10 +335,16 @@
 
                 function _initEventAttach() {
                     getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
-                        if (confirm("YOU OK?")) {
-                            _createVideoElement();
-                            _getVideoAccess();
+                        if (option.$video != null) {
+                            _removeVideoElement();
+                            alert("disabled");
+                        } else {
+                            if (confirm("YOU OK?")) {
+                                _createVideoElement();
+                                _getVideoAccess();
+                            };
                         };
+
                     });
                 };
         
