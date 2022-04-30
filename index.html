@@ -92,8 +92,8 @@
                         var $this = this;
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
-                                clearRect(_mcanvas);
-                                _mcanvas.drawImage($this, 0, 0);
+                                clearRect(_bctx);
+                                _bctx.drawImage($this, 0, 0);
                                 setTimeout(loop, 1000 / 30);
                             }
                         })();
@@ -208,21 +208,26 @@
                     var iy = 0;
                     if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
         
-                        clearRect(_mctx);
-                        _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
-                        
-                        for(ix=0;ix<img.naturalWidth;++ix) {
-                            self[ix] = [];
-                            for(iy=0;iy<img.naturalHeight;++iy) {
-                                self[ix][iy] = 0;
+                        try {
+                            clearRect(_mctx);
+                            _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+                            
+                            for(ix=0;ix<img.naturalWidth;++ix) {
+                                self[ix] = [];
+                                for(iy=0;iy<img.naturalHeight;++iy) {
+                                    self[ix][iy] = 0;
+                                };
                             };
-                        };
-        
-                        for(ix=0;ix<img.naturalWidth;++ix) {
-                            for(iy=0;iy<img.naturalHeight;++iy) {
-                                self[ix][iy] = _pickaPixel(ix, iy);
+            
+                            for(ix=0;ix<img.naturalWidth;++ix) {
+                                for(iy=0;iy<img.naturalHeight;++iy) {
+                                    self[ix][iy] = _pickaPixel(ix, iy);
+                                };
                             };
+                        } catch(e) {
+                            console.error("err - image load is something wrong.");
                         };
+
         
                     };
                     renderBox.push(self);
