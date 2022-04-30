@@ -60,15 +60,15 @@
                 };
 
                 function _removeVideoElement() {
+                    console.log(option.$video.srcObject);
                     if (option.$video != null) {
                         try {
                             option.$video.srcObject.stop();
+                            delete option.$video;
+                            option.$video = null;
                         } catch(e) {
                             alert("err - streamObject stop is failed");
                         };
-                        
-                        delete option.$video;
-                        option.$video = null;
                     } else {
                         alert("err - _removeVideoElement"); 
                     };
