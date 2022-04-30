@@ -211,7 +211,7 @@
                     if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
         
                         try {
-                            // clearRect(_mctx);
+                            clearRect(_mctx);
                             console.log(img);
                             _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
                             
@@ -246,6 +246,7 @@
         
                 function _imageLoadHandler_success(e, type) {
                     if (e.path != undefined) {
+                        console.log("image loaded : ",e, type);
                         for(var key in e.path) {
                             imageBox.push(e.path[key]);
                             _convertAscii2Image(e.path[key]);
