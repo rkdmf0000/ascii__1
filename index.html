@@ -62,6 +62,7 @@
                 function _removeVideoElement() {
                     if (option.$video != null) {
                         try {
+                            option.$video.pause();
                             option.$video.srcObject.getTracks().forEach(function(track) {
                                 track.stop();
                             });
