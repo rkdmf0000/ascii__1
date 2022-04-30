@@ -74,6 +74,9 @@
 
             if ((timestamp - option.frameStock) <= 1000) {
                 ++option.fps;
+                ctx.fillStyle   = "#fafafa";
+                ctx.font        = "14px monospace";
+                ctx.fillText("[SLEEP !!]", 100, 230);
                 window.requestAnimationFrame(draw);
                 return false;
             }; 
@@ -105,7 +108,7 @@
             
             ctx.fillStyle   = "#fafafa";
             ctx.font        = "14px monospace";
-            ctx.fillText("FPS : " + option.fps, 10, 50);
+            ctx.fillText("FPS : " + option.fps, 100, 210);
             ctx.fillText("ok good", 100, 200);
             
             
