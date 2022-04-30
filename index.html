@@ -300,6 +300,9 @@
                 };
         
                 function opening() {
+
+                    _initEventAttach();
+
                     _nodeIsNoPads(parent);
                     _nodeIsNoMargins(parent);
         
@@ -318,7 +321,7 @@
         
 
 
-                    
+
 
 
                     parent.appendChild(canvas);
