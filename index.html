@@ -211,7 +211,8 @@
                     if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
         
                         try {
-                            clearRect(_mctx);
+                            // clearRect(_mctx);
+                            console.log(img);
                             _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
                             
                             for(ix=0;ix<img.naturalWidth;++ix) {
