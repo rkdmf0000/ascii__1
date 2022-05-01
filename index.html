@@ -349,9 +349,11 @@
                     };
                 };
         
+                //기본 입장시 이미지 로드
+                //버튼을 눌러서 초기화 가능
                 function dataLoader() {
         
-                    _loadImageData("./download.jpg");
+                    // _loadImageData("./download.jpg");
                 };
         
                 function opening() {
@@ -396,7 +398,7 @@
                         renderBoxClear();
                         _loadImageData("./download.jpg");
                         alert("OK GOOD");
-                    };
+                    });
 
                     getElement().BTN.VIDEO_ACCESS.innerHTML = "GET STREAM ACCESS AND CONVERT CAM TOGGLE";
                     getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
