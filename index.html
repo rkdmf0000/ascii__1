@@ -17,19 +17,20 @@
         <div class="panel-wrap">
             <button id="BTN_ACCESS_VIDEO"></button>
             <button id="BTN_TEST_IMAGE_LOAD"></button>
+            <button id="BTN_STOP"></button>
         </div>
 
         <script type="text/javascript">
             ;(function(parent, canvas, _mcanvas, _canvasBuffer) {
         
-                console.log("0.0.1.5");
+                console.log("0.1.0.0");
 
         
                 var imageLength = 0;
                 var imageBox    = [];
         
                 var renderBox   = [];
-        
+
                 var option      = {
                     $video              : null,
                     initLoad            : false,
@@ -40,7 +41,10 @@
                     frameLine           : 0,
                     frameTarget         : 60,
                     frameInterval       : 10,
-                    fps                 : 0
+                    fps                 : 0,
+                    stopDrawing         : true,
+                    isStaticLoad        : false,
+                    streamNextFrameIsOk : false
                 };
         
         
@@ -62,8 +66,9 @@
                 function getElement() {
                     var $ = {};
                     $["BTN"] = {}
-                    $["BTN"]["VIDEO_ACCESS"] = window.document.getElementById("BTN_ACCESS_VIDEO");
+                    $["BTN"]["VIDEO_ACCESS"]    = window.document.getElementById("BTN_ACCESS_VIDEO");
                     $["BTN"]["TEST_IMAGE_LOAD"] = window.document.getElementById("BTN_TEST_IMAGE_LOAD");
+                    $["BTN"]["STOP"]            = window.document.getElementById("BTN_STOP");
                     
                     return $;
                 };
@@ -88,7 +93,19 @@
         
                 function _mCanvasToImage() {
                     var img = new Image();
-                    var binary = _mcanvas.toDataURL();
+                    var binary = _mcanvas.toDataURL("image/png", 1);
+                    option.streamNextFrameIsOk = false;
+                    img.onload = function(e) {
+                        if (e.path != undefined) {
+                            console.log("image loaded : ",e);
+                            for(var key in e.path) {
+                                imageBox.push(e.path[key]);
+                                console.log(e.path[key].width, e.path[key].height);
+                                _convertAscii2Image(e.path[key]);
+                                option.streamNextFrameIsOk = true;
+                            };
+                        };
+                    };
                     img.src = binary;
                     return img;
                 };
@@ -100,13 +117,21 @@
 
                     option.$video.addEventListener('play', function () {
                         var $this = this;
+                        option.streamNextFrameIsOk = true;
+
+                        // console.log("vd size", option.$video.videoWidth, option.$video.videoHeight);
+                        _resizeToCustomSizeOfNode(_mcanvas, option.$video.videoWidth, option.$video.videoHeight);
+
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
-                                clearRect(_mctx);
-                                renderBoxClear();
-                                _mctx.drawImage($this, 0, 0);
-                                _convertAscii2Image(_mCanvasToImage());
-                                setTimeout(loop, 1000 / 30);
+                                if (option.isStaticLoad === false && option.streamNextFrameIsOk === true) {
+                                    console.log("get ready frame [go]");
+                                    clearRect(_mctx);
+                                    _mctx.drawImage($this, 0, 0);
+                                    _mCanvasToImage();
+                                };
+                                console.log("get ready frame [wait]");
+                                setTimeout(loop, 1000 / 4);
                             }
                         })();
                     }, 0);
@@ -166,31 +191,42 @@
                         var y = 0;
                         _bctx.fillStyle   = "#fafafa";
                         _bctx.font        = "8px monospace";
-                        for(i=0;i<renderBox.length;++i) {
-                            for(x=0;x<200;++x) {
-                                for(y=0;y<200;++y) {
-                                    if (renderBox[i][x]) {
-                                        if (renderBox[i][x][y]) {
-                                            _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
-                                        };
-                                    }
-                                };
+ 
+                        for(x=0;x<1000;++x) {
+                            for(y=0;y<1000;++y) {
+                                if (renderBox[i][x]) {
+                                    if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
+                                        _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
+                                    };
+                                }
                             };
                         };
+
+                        renderBox.shift();
                     };
                 };
         
                 function draw(timestamp) {
-                    if (imageLength != imageBox.length) {
+
+
+                    if (option.stopDrawing === true) {
+                        clearRect(ctx);
+                        clearRect(_bctx);
+                        window.requestAnimationFrame(draw);
+                        return false;
+                    };
+
+                    if (imageLength != imageBox.length && option.isStaticLoad === true) {
                         console.log("Now loading...");
                         window.requestAnimationFrame(draw);
                         return false;
                     };
         
+                    // console.log("ruun");
+
                     if ((timestamp - option.frameStock) <= 1000) {
                         ++option.fps;
                         // __textDrawInSleep();
-                        //return;
                     };
                     
                     if (option.initLoad === false) {
@@ -198,17 +234,23 @@
                         console.log(renderBox);
                     };
         
+
+
                     //clear
                     clearRect(ctx);
                     clearRect(_bctx);
                     __drawGrid();
-                    __textDrawEtc();
+                    // __textDrawEtc();
+
                     ctx.drawImage(_canvasBuffer, 0, 0);
         
                     option.fps = 0;
                     option.frameStock = timestamp;
         
-                    window.requestAnimationFrame(draw);
+
+                    setTimeout(function() {
+                        window.requestAnimationFrame(draw);
+                    }, 1000 / 60)
                     return true;
                 };
         
@@ -220,22 +262,27 @@
                     var self = [];
                     var ix = 0;
                     var iy = 0;
+                    var pass = false;
                     if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
-        
+                        pass = true;
                         try {
                             clearRect(_mctx);
-                            console.log(img);
                             _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
                             
+                            console.log(img.naturalWidth, img.naturalHeight);
+
                             for(ix=0;ix<img.naturalWidth;++ix) {
+                                // console.log("init x : ",ix ,img.naturalWidth);
                                 self[ix] = [];
                                 for(iy=0;iy<img.naturalHeight;++iy) {
+                                    // console.log("init y : ",iy ,img.naturalHeight);
                                     self[ix][iy] = 0;
                                 };
                             };
             
                             for(ix=0;ix<img.naturalWidth;++ix) {
                                 for(iy=0;iy<img.naturalHeight;++iy) {
+                                    // console.log("conv progress : ",ix+iy ,img.naturalWidth+img.naturalHeight);
                                     self[ix][iy] = _pickaPixel(ix, iy);
                                 };
                             };
@@ -245,7 +292,8 @@
 
         
                     };
-                    renderBox.push(self);
+
+                    if (pass === true) {renderBox.push(self);}
                 };
         
         
@@ -274,6 +322,7 @@
                     --imageLength;
                 };
                 function _loadImageData(url) {
+                    option.isStaticLoad = true;
                     var image = new Image();
                 
                     image.onload = _imageLoadHandler_success;
@@ -302,7 +351,15 @@
         
         
         
-        
+                
+                function _resizeToCustomSizeOfNode(element, w, h) {
+                    if (element != undefined) {
+                        // element.width     = def.width+"px";
+                        // element.height    = def.height+"px";
+                        element.setAttribute("width", w+"px");
+                        element.setAttribute("height", h+"px");
+                    };
+                };
                 function _resizeToMaximumSizeOfNode(element) {
                     var def = _getElementPos(parent);
                     if (element != undefined) {
@@ -395,24 +452,48 @@
                     
                     getElement().BTN.TEST_IMAGE_LOAD.innerHTML = "LOAD TEST IMAGE";
                     getElement().BTN.TEST_IMAGE_LOAD.addEventListener("click", function() {
+                        option.isStaticLoad = true;
                         renderBoxClear();
                         _loadImageData("./download.jpg");
+                        option.stopDrawing = false;
                         alert("OK GOOD");
                     });
 
+
+
+
                     getElement().BTN.VIDEO_ACCESS.innerHTML = "GET STREAM ACCESS AND CONVERT CAM TOGGLE";
                     getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
+                        option.isStaticLoad = false;
                         if (option.$video != null) {
                             _removeVideoElement();
+                            option.stopDrawing = true;
                             alert("disabled");
                         } else {
                             if (confirm("YOU OK?")) {
+                                option.stopDrawing = false;
+                                // option.stopDrawing = true;
                                 _createVideoElement();
                                 _getVideoAccess();
                             };
                         };
-
                     });
+
+
+
+                    getElement().BTN.STOP.innerHTML = "STOP";
+                    getElement().BTN.STOP.addEventListener("click", function() {
+                        renderBoxClear();
+                        option.stopDrawing = true;
+                        alert("stop!");
+                    });
+
+
+
+
+
+
+
                 };
         
                 function initEventReAttach() {
@@ -424,7 +505,7 @@
                     // window.removeEventListener("resize");
                     window.addEventListener("resize", function() {
                         _resizeToMaximumSizeOfNode(canvas);
-                        _resizeToMaximumSizeOfNode(_mcanvas);
+                        // _resizeToMaximumSizeOfNode(_mcanvas);
                     }, false);
                 };
         
