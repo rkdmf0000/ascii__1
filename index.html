@@ -36,6 +36,8 @@
                     initLoad            : false,
                     parentWidth         : 0,
                     parentHeight        : 0,
+                    contentWidth        : 0,
+                    contentHeight       : 0,
                     textSpace           : 8,
                     frameStock          : 0,
                     frameLine           : 0,
@@ -50,9 +52,9 @@
         
                 var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", ".", " "];
         
-                var ctx     = canvas.getContext("2d");
-                var _mctx   = _mcanvas.getContext("2d");
-                var _bctx   = _canvasBuffer.getContext("2d");
+                var ctx     = canvas.getContext("2d", { alpha: false });
+                var _mctx   = _mcanvas.getContext("2d", { alpha: false });
+                var _bctx   = _canvasBuffer.getContext("2d", { alpha: false });
         
                 console.log("canvas : ", canvas, "ctx : ", ctx);
                 console.log("canvas : ", _mcanvas, "ctx : ", _mctx);
@@ -93,14 +95,12 @@
         
                 function _mCanvasToImage() {
                     var img = new Image();
-                    var binary = _mcanvas.toDataURL("image/png", 1);
+                    var binary = _mcanvas.toDataURL("image/png", 0.1);
                     option.streamNextFrameIsOk = false;
                     img.onload = function(e) {
                         if (e.path != undefined) {
-                            console.log("image loaded : ",e);
                             for(var key in e.path) {
-                                imageBox.push(e.path[key]);
-                                console.log(e.path[key].width, e.path[key].height);
+                                // console.log(e.path[key].width, e.path[key].height);
                                 _convertAscii2Image(e.path[key]);
                                 option.streamNextFrameIsOk = true;
                             };
@@ -121,17 +121,20 @@
 
                         // console.log("vd size", option.$video.videoWidth, option.$video.videoHeight);
                         _resizeToCustomSizeOfNode(_mcanvas, option.$video.videoWidth, option.$video.videoHeight);
+                        option.contentWidth = option.$video.videoWidth;
+                        option.contentHeight = option.$video.videoHeight;
 
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
                                 if (option.isStaticLoad === false && option.streamNextFrameIsOk === true) {
-                                    console.log("get ready frame [go]");
+                                    // console.log("get ready frame [go]");
                                     clearRect(_mctx);
                                     _mctx.drawImage($this, 0, 0);
+                                    //option.contentWidth * 0.3, option.contentHeight * 0.3
                                     _mCanvasToImage();
                                 };
-                                console.log("get ready frame [wait]");
-                                setTimeout(loop, 1000 / 4);
+                                // console.log("get ready frame [wait]");
+                                setTimeout(loop, 1000 / 16);
                             }
                         })();
                     }, 0);
@@ -192,8 +195,10 @@
                         _bctx.fillStyle   = "#fafafa";
                         _bctx.font        = "8px monospace";
  
-                        for(x=0;x<1000;++x) {
-                            for(y=0;y<1000;++y) {
+                        console.log(option.contentWidth, option.contentHeight, renderBox[i].length);
+
+                        for(x=0;x<option.contentWidth;++x) {
+                            for(y=0;y<option.contentHeight;++y) {
                                 if (renderBox[i][x]) {
                                     if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
                                         _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
@@ -269,8 +274,6 @@
                             clearRect(_mctx);
                             _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
                             
-                            console.log(img.naturalWidth, img.naturalHeight);
-
                             for(ix=0;ix<img.naturalWidth;++ix) {
                                 // console.log("init x : ",ix ,img.naturalWidth);
                                 self[ix] = [];
@@ -311,7 +314,7 @@
         
                 function _imageLoadHandler_success(e, type) {
                     if (e.path != undefined) {
-                        console.log("image loaded : ",e, type);
+                        // console.log("image loaded : ",e, type);
                         for(var key in e.path) {
                             imageBox.push(e.path[key]);
                             _convertAscii2Image(e.path[key]);
@@ -428,7 +431,7 @@
                     //ctx.setTransform(1,0,0,1,0,0);
         
         
-                    _resizeToMaximumSizeOfNode(_mcanvas);
+                    // _resizeToMaximumSizeOfNode(_mcanvas);
                     _resizeToMaximumSizeOfNode(_canvasBuffer);
         
                     //data load for convertion
@@ -505,6 +508,7 @@
                     // window.removeEventListener("resize");
                     window.addEventListener("resize", function() {
                         _resizeToMaximumSizeOfNode(canvas);
+                        _resizeToMaximumSizeOfNode(_canvasBuffer);
                         // _resizeToMaximumSizeOfNode(_mcanvas);
                     }, false);
                 };
