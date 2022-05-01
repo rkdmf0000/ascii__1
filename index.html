@@ -16,6 +16,7 @@
         
         <div class="panel-wrap">
             <button id="BTN_ACCESS_VIDEO"></button>
+            <button id="BTN_TEST_IMAGE_LOAD"></button>
         </div>
 
         <script type="text/javascript">
@@ -62,6 +63,8 @@
                     var $ = {};
                     $["BTN"] = {}
                     $["BTN"]["VIDEO_ACCESS"] = window.document.getElementById("BTN_ACCESS_VIDEO");
+                    $["BTN"]["TEST_IMAGE_LOAD"] = window.document.getElementById("BTN_TEST_IMAGE_LOAD");
+                    
                     return $;
                 };
 
@@ -83,6 +86,13 @@
         
                 };
         
+                function _mCanvasToImage() {
+                    var img = new Image();
+                    var binary = _mcanvas.toDataURL();
+                    img.src = binary;
+                    return img;
+                };
+
                 function _createVideoElement() {
                     option.$video           = window.document.createElement("video");
                     option.$video.autoplay  = true;
@@ -92,8 +102,10 @@
                         var $this = this;
                         (function loop() {
                             if (!$this.paused && !$this.ended) {
-                                clearRect(_bctx);
-                                _bctx.drawImage($this, 0, 0);
+                                clearRect(_mctx);
+                                renderBoxClear();
+                                _mctx.drawImage($this, 0, 0);
+                                _convertAscii2Image(_mCanvasToImage());
                                 setTimeout(loop, 1000 / 30);
                             }
                         })();
@@ -237,6 +249,11 @@
                 };
         
         
+                function renderBoxClear() {
+                    renderBox = null;
+                    renderBox = [];
+                };
+
                 function _pickaPixel(x, y) {
                     var pixel = _mctx.getImageData(x, y, 1, 1);
                     var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
@@ -373,6 +390,14 @@
                 };
 
                 function _initEventAttach() {
+                    
+                    getElement().BTN.TEST_IMAGE_LOAD.innerHTML = "LOAD TEST IMAGE";
+                    getElement().BTN.TEST_IMAGE_LOAD.addEventListener("click", function() {
+                        renderBoxClear();
+                        _loadImageData("./download.jpg");
+                        alert("OK GOOD");
+                    };
+
                     getElement().BTN.VIDEO_ACCESS.innerHTML = "GET STREAM ACCESS AND CONVERT CAM TOGGLE";
                     getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
                         if (option.$video != null) {
