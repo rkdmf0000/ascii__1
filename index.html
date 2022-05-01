@@ -207,7 +207,8 @@
                             };
                         };
 
-                        renderBox.shift();
+                        if (option.isStaticLoad === false)
+                            renderBox.shift();
                     };
                 };
         
