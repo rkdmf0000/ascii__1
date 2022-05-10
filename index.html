@@ -147,7 +147,12 @@
                 function _getVideoAccess() {
                     if ("mediaDevices" in window.navigator) {
                         if (option.$video != null) {
-                            window.navigator.mediaDevices.getUserMedia({video : true}).then(function(streamObject){
+                            window.navigator.mediaDevices.getUserMedia({
+                                audio: false,
+                                video: {
+                                    facingMode: "environment"
+                                }
+                            }).then(function(streamObject){
                                 option.$video.srcObject = streamObject;
                             }).catch(function(err){
                                 alert("err - mediaDevices is something wrong!");
