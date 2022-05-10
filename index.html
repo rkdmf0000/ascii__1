@@ -23,7 +23,7 @@
         <script type="text/javascript">
             ;(function(parent, canvas, _mcanvas, _canvasBuffer) {
         
-                console.log("0.1.0.0");
+                console.log("0.1.0.1");
 
         
                 var imageLength = 0;
@@ -56,6 +56,8 @@
                 var _mctx   = _mcanvas.getContext("2d", { alpha: false });
                 var _bctx   = _canvasBuffer.getContext("2d", { alpha: false });
         
+                ctx.scale(0.2, 0.2);
+                
                 console.log("canvas : ", canvas, "ctx : ", ctx);
                 console.log("canvas : ", _mcanvas, "ctx : ", _mctx);
                 console.log("canvas : ", _canvasBuffer, "ctx : ", _bctx);
@@ -248,7 +250,7 @@
                     __drawGrid();
                     // __textDrawEtc();
 
-                    ctx.drawImage(_canvasBuffer, 0, 0, 500, 500);
+                    ctx.drawImage(_canvasBuffer, 0, 0);
         
                     option.fps = 0;
                     option.frameStock = timestamp;
