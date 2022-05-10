@@ -50,8 +50,7 @@
                 };
         
         
-                var contrastAscii = ["@", "%", "#", "+", "=", "*", "^", "~", "-", "_", ",", ".", " "];
-                contrastAscii = [" ", " ", ".", ",", "_", "-", "~", "^", "*", "=", "+", "#", "%", "@"];
+                var contrastAscii = [" ",".",",","`","\"","'","-","~","^","*","+","=","o","a","b","g","A","B","G" "$","#","%","@"]];
                 var ctx     = canvas.getContext("2d", { alpha: false });
                 var _mctx   = _mcanvas.getContext("2d", { alpha: false });
                 var _bctx   = _canvasBuffer.getContext("2d", { alpha: false });
@@ -173,7 +172,7 @@
                 };
         
                 function selectASCII(fff) {
-                    var pick = Math.round(normalization(255, 1, fff, 0, 13));
+                    var pick = Math.round(normalization(255, 1, fff, 0, contrastAscii.length - 1));
                     return (contrastAscii[pick] ? contrastAscii[pick] : " ");
                 };
         
