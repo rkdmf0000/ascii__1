@@ -130,7 +130,7 @@
                                 if (option.isStaticLoad === false && option.streamNextFrameIsOk === true) {
                                     // console.log("get ready frame [go]");
                                     clearRect(_mctx);
-                                    _mctx.drawImage($this, 0, 0, option.contentWidth * 0.1, option.contentHeight * 0.1);
+                                    _mctx.drawImage($this, 0, 0, option.contentWidth * 0.3, option.contentHeight * 0.3);
                                     //option.contentWidth * 0.3, option.contentHeight * 0.3
                                     _mCanvasToImage();
                                 };
@@ -204,8 +204,8 @@
  
                         // console.log(option.contentWidth, option.contentHeight, renderBox[i].length);
 
-                        for(x=0;x<option.contentWidth*0.1;++x) {
-                            for(y=0;y<option.contentHeight*0.1;++y) {
+                        for(x=0;x<option.contentWidth*0.3;++x) {
+                            for(y=0;y<option.contentHeight*0.3;++y) {
                                 if (renderBox[i][x]) {
                                     if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
                                         _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
