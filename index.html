@@ -56,7 +56,7 @@
                 var _mctx   = _mcanvas.getContext("2d", { alpha: false });
                 var _bctx   = _canvasBuffer.getContext("2d", { alpha: false });
         
-                ctx.scale(0.2, 0.2);
+                //ctx.scale(0.2, 0.2);
                 
                 console.log("canvas : ", canvas, "ctx : ", ctx);
                 console.log("canvas : ", _mcanvas, "ctx : ", _mctx);
@@ -131,7 +131,7 @@
                                 if (option.isStaticLoad === false && option.streamNextFrameIsOk === true) {
                                     // console.log("get ready frame [go]");
                                     clearRect(_mctx);
-                                    _mctx.drawImage($this, 0, 0);
+                                    _mctx.drawImage($this, 0, 0, option.contentWidth * 0.3, option.contentHeight * 0.3);
                                     //option.contentWidth * 0.3, option.contentHeight * 0.3
                                     _mCanvasToImage();
                                 };
