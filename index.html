@@ -199,8 +199,8 @@
  
                         // console.log(option.contentWidth, option.contentHeight, renderBox[i].length);
 
-                        for(x=0;x<option.contentWidth;++x) {
-                            for(y=0;y<option.contentHeight;++y) {
+                        for(x=0;x<option.contentWidth*0.16;++x) {
+                            for(y=0;y<option.contentHeight*0.16;++y) {
                                 if (renderBox[i][x]) {
                                     if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
                                         _bctx.fillText(selectASCII(renderBox[i][x][y]), (x + (x*option.textSpace)), (y + (y*option.textSpace)));
