@@ -150,7 +150,8 @@
                             window.navigator.mediaDevices.getUserMedia({
                                 audio: false,
                                 video: {
-                                    facingMode: "environment"
+                                    //facingMode: "environment",
+                                    facingMode: "user"
                                 }
                             }).then(function(streamObject){
                                 option.$video.srcObject = streamObject;
