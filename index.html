@@ -97,7 +97,7 @@
                 function _mCanvasToImage() {
                     var img = new Image();
                     var binary = _mcanvas.toBlob(function(blob) {
-                        
+                        const blobUrl = URL.createObjectURL(blob);
                         option.streamNextFrameIsOk = false;
                         img.onload = function(e) {
                             if (e.path != undefined) {
@@ -107,8 +107,9 @@
                                     option.streamNextFrameIsOk = true;
                                 };
                             };
+                            URL.revokeObjectURL(blobUrl);
                         };
-                        img.src = blob;
+                        img.src = blobUrl;
                         
                     });
                     return img;
