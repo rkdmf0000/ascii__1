@@ -96,18 +96,19 @@
         
                 function _mCanvasToImage() {
                     var img = new Image();
-                    var binary = _mcanvas.toDataURL();
-                    option.streamNextFrameIsOk = false;
-                    img.onload = function(e) {
-                        if (e.path != undefined) {
-                            for(var key in e.path) {
-                                // console.log(e.path[key].width, e.path[key].height);
-                                _convertAscii2Image(e.path[key]);
-                                option.streamNextFrameIsOk = true;
+                    var binary = _mcanvas.toBlob(function(blob) {
+                        option.streamNextFrameIsOk = false;
+                        img.onload = function(e) {
+                            if (e.path != undefined) {
+                                for(var key in e.path) {
+                                    // console.log(e.path[key].width, e.path[key].height);
+                                    _convertAscii2Image(e.path[key]);
+                                    option.streamNextFrameIsOk = true;
+                                };
                             };
                         };
-                    };
-                    img.src = binary;
+                        img.src = binary;
+                    });
                     return img;
                 };
 
