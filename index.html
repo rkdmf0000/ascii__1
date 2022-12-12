@@ -96,7 +96,7 @@
         
                 function _mCanvasToImage() {
                     var img = new Image();
-                    var binary = _mcanvas.toBlob("image/png", 0.1);
+                    var binary = _mcanvas.toDataURL();
                     option.streamNextFrameIsOk = false;
                     img.onload = function(e) {
                         if (e.path != undefined) {
