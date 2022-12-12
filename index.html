@@ -7,8 +7,6 @@
             *{position:relative;box-sizing: border-box;-webkit-box-sizing: border-box;z-index:2;}
             canvas{z-index:1;}
             html, body{position:fixed;top:0;bottom:0;left:0;right:0;}
-
-
             .panel-wrap{width:100%;padding-top:6px;padding-bottom:6px;padding-left:6px;padding-right:6px;}
         </style>
     </head>
@@ -110,7 +108,6 @@
                             URL.revokeObjectURL(blobUrl);
                         };
                         img.src = blobUrl;
-                        
                     });
                     return img;
                 };
@@ -139,7 +136,7 @@
                                     _mCanvasToImage();
                                 };
                                 // console.log("get ready frame [wait]");
-                                setTimeout(loop, 1000);
+                                setTimeout(loop, 64);
                             }
                         })();
                     }, 0);
