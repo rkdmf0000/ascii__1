@@ -211,9 +211,9 @@
                                 if (renderBox[i][x]) {
                                     if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
                                         let buffer_str = selectASCII(renderBox[i][x][y]);
-                                        if (buffer_str == "." || buffer_str == "" || buffer_str == "+" || buffer_str == "*" || buffer_str == "." || buffer_str == "-" || buffer_str == "_") {
+                                       
                                             _bctx.fillText(buffer_str, (x + (x*option.textSpace)), (y + (y*option.textSpace)));
-                                        }
+                                        
    
                                     };
                                 }
