@@ -1,555 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>| | | | | |</title>
-        <meta charset="UTF-8">
-        <style>
-            *{position:relative;box-sizing: border-box;-webkit-box-sizing: border-box;z-index:2;}
-            canvas{z-index:1;}
-            html, body{position:fixed;top:0;bottom:0;left:0;right:0;}
-            .panel-wrap{width:100%;padding-top:6px;padding-bottom:6px;padding-left:6px;padding-right:6px;}
-        </style>
-    </head>
-    <body>
-        
-        <div class="panel-wrap">
-            <button id="BTN_ACCESS_VIDEO"></button>
-            <button id="BTN_TEST_IMAGE_LOAD"></button>
-            <button id="BTN_STOP"></button>
-        </div>
 
-        <script type="text/javascript">
-            ;(function(parent, canvas, _mcanvas, _canvasBuffer) {
-        
-                console.log("0.1.0.1");
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas and Video Streaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        
-                var imageLength = 0;
-                var imageBox    = [];
-        
-                var renderBox   = [];
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
 
-                var option      = {
-                    $video              : null,
-                    initLoad            : false,
-                    parentWidth         : 0,
-                    parentHeight        : 0,
-                    contentWidth        : 0,
-                    contentHeight       : 0,
-                    textSpace           : 8,
-                    frameStock          : 0,
-                    frameLine           : 0,
-                    frameTarget         : 60,
-                    frameInterval       : 10,
-                    fps                 : 0,
-                    stopDrawing         : true,
-                    isStaticLoad        : false,
-                    streamNextFrameIsOk : false
-                };
-        
-        
-                var contrastAscii = ["",".",",","`","\"","'","-","~","^","*","+","=","o","a","b","g","A","B","G","$","#","%","@"];
-                var ctx     = canvas.getContext("2d", { alpha: false });
-                var _mctx   = _mcanvas.getContext("2d", { alpha: false });
-                var _bctx   = _canvasBuffer.getContext("2d", { alpha: false });
-        
-                //ctx.scale(0.2, 0.2);
-                
-                console.log("canvas : ", canvas, "ctx : ", ctx);
-                console.log("canvas : ", _mcanvas, "ctx : ", _mctx);
-                console.log("canvas : ", _canvasBuffer, "ctx : ", _bctx);
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
 
-                function normalization(v_min, v_max, value, n_min, n_max) {
-                    return (n_max - n_min) * (value - v_min) / (v_max - v_min) + n_min;
-                };
-        
-        
-                function getElement() {
-                    var $ = {};
-                    $["BTN"] = {}
-                    $["BTN"]["VIDEO_ACCESS"]    = window.document.getElementById("BTN_ACCESS_VIDEO");
-                    $["BTN"]["TEST_IMAGE_LOAD"] = window.document.getElementById("BTN_TEST_IMAGE_LOAD");
-                    $["BTN"]["STOP"]            = window.document.getElementById("BTN_STOP");
-                    
-                    return $;
-                };
+        .panel-wrap {
+            z-index: 2;
+            position: relative;
+            padding: 20px;
+            text-align: center;
+        }
 
-                function _removeVideoElement() {
-                    if (option.$video != null) {
-                        try {
-                            option.$video.pause();
-                            option.$video.srcObject.getTracks().forEach(function(track) {
-                                track.stop();
-                            });
-                            delete option.$video;
-                            option.$video = null;
-                        } catch(e) {
-                            alert("err - streamObject stop is failed");
-                        };
-                    } else {
-                        alert("err - _removeVideoElement"); 
-                    };
-        
-                };
-        
-                function _mCanvasToImage() {
-                    var img = new Image();
-                    var binary = _mcanvas.toBlob(function(blob) {
-                        const blobUrl = URL.createObjectURL(blob);
-                        option.streamNextFrameIsOk = false;
-                        img.onload = function(e) {
-                            if (e.path != undefined) {
-                                for(var key in e.path) {
-                                    // console.log(e.path[key].width, e.path[key].height);
-                                    _convertAscii2Image(e.path[key]);
-                                    option.streamNextFrameIsOk = true;
-                                };
-                            };
-                            URL.revokeObjectURL(blobUrl);
-                        };
-                        img.src = blobUrl;
-                    });
-                    return img;
-                };
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
 
-                function _createVideoElement() {
-                    option.$video           = window.document.createElement("video");
-                    option.$video.autoplay  = true;
-                    option.$video.srcObject = void(0);
+        #asciiOutput {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 90%;
+            max-height: 100px;
+            overflow: auto;
+            z-index: 100;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
 
-                    option.$video.addEventListener('play', function () {
-                        var $this = this;
-                        option.streamNextFrameIsOk = true;
+<body>
 
-                        // console.log("vd size", option.$video.videoWidth, option.$video.videoHeight);
-                        _resizeToCustomSizeOfNode(_mcanvas, option.$video.videoWidth, option.$video.videoHeight);
-                        option.contentWidth = option.$video.videoWidth;
-                        option.contentHeight = option.$video.videoHeight;
+    <div class="panel-wrap">
+        <button id="BTN_ACCESS_VIDEO">Access Video</button>
+        <input type="range" id="sensitivityRange" min="0.1" max="5" step="0.1" value="1">
+    </div>
 
-                        (function loop() {
-                            if (!$this.paused && !$this.ended) {
-                                if (option.isStaticLoad === false && option.streamNextFrameIsOk === true) {
-                                    // console.log("get ready frame [go]");
-                                    clearRect(_mctx);
-                                    _mctx.drawImage($this, 0, 0, option.contentWidth * 0.3, option.contentHeight * 0.3);
-                                    //option.contentWidth * 0.3, option.contentHeight * 0.3
-                                    _mCanvasToImage();
-                                };
-                                // console.log("get ready frame [wait]");
-                                //이거 동적으로 맞춰야 속도가 잘 나오는데 귀찮네.. 우짜지?
-                                setTimeout(loop, 256);
+    <canvas id="mainCanvas"></canvas>
+    <canvas id="bufferCanvas"></canvas>
+    <canvas id="processingCanvas" style="display:none;"></canvas>
+
+    <div id="asciiOutput"></div>
+
+</body>
+
+<script>
+    (function () {
+        const canvas = document.getElementById("mainCanvas");
+        const _canvasBuffer = document.getElementById("bufferCanvas");
+        const _mcanvas = document.getElementById("processingCanvas");
+        const ctx = canvas.getContext("2d", { alpha: false });
+        const _mctx = _mcanvas.getContext("2d", { alpha: false });
+        const _bctx = _canvasBuffer.getContext("2d", { alpha: false });
+
+        const option = {
+            $video: null,
+            initLoad: false,
+            parentWidth: 0,
+            parentHeight: 0,
+            contentWidth: 0,
+            contentHeight: 0,
+            fps: 0,
+            stopDrawing: true,
+            streamNextFrameIsOk: false,
+            sensitivity: 1 
+        };
+
+        document.getElementById("sensitivityRange").addEventListener("input", function () {
+            adjustSensitivity(this.value);
+        });
+
+        function _resizeToMaximumSizeOfNode(element) {
+            const { clientWidth, clientHeight } = document.body;
+            element.width = clientWidth;
+            element.height = clientHeight;
+            option.parentWidth = clientWidth;
+            option.parentHeight = clientHeight;
+            console.log("Canvas resized to:", clientWidth, clientHeight);
+        }
+
+        _resizeToMaximumSizeOfNode(canvas);
+        _resizeToMaximumSizeOfNode(_canvasBuffer);
+
+        function clearRect(ctx) {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
+        }
+
+        function draw() {
+            if (option.stopDrawing) {
+                clearRect(ctx);
+                clearRect(_bctx);
+                requestAnimationFrame(draw);
+                return;
+            }
+
+            clearRect(ctx);
+            clearRect(_bctx);
+            ctx.drawImage(_canvasBuffer, 0, 0); 
+            console.log("Drawing on main canvas...");
+
+            requestAnimationFrame(draw);
+        }
+
+        function _createVideoElement() {
+            if (!option.$video) {
+                option.$video = document.createElement("video");
+                option.$video.autoplay = true;
+                option.$video.srcObject = null;
+                option.$video.addEventListener("play", function () {
+                    option.streamNextFrameIsOk = true;
+                    _resizeToMaximumSizeOfNode(_mcanvas);
+                    option.contentWidth = option.$video.videoWidth;
+                    option.contentHeight = option.$video.videoHeight;
+                    console.log("Video started playing. Width:", option.contentWidth, "Height:", option.contentHeight);
+
+                    (function loop() {
+                        if (!option.$video.paused && !option.$video.ended) {
+                            if (option.streamNextFrameIsOk) {
+                                clearRect(_mctx);
+                                _mctx.drawImage(option.$video, 0, 0, option.contentWidth * 0.3, option.contentHeight * 0.3);
+
+                                _bctx.clearRect(0, 0, option.parentWidth, option.parentHeight);
+                                _bctx.drawImage(_mcanvas, 0, 0);
+                                videoToAscii();
                             }
-                        })();
-                    }, 0);
+                            setTimeout(loop, 1000 / 30);
+                        }
+                    })();
+                });
+            }
+        }
 
+        function _getVideoAccess() {
+            if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                navigator.mediaDevices.enumerateDevices().then(devices => {
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-                };
-        
-                function _getVideoAccess() {
-                    if ("mediaDevices" in window.navigator) {
-                        if (option.$video != null) {
-                            window.navigator.mediaDevices.getUserMedia({
-                                audio: false,
-                                video: {
-                                    //facingMode: "environment",
-                                    facingMode: "user"
-                                }
-                            }).then(function(streamObject){
-                                option.$video.srcObject = streamObject;
-                            }).catch(function(err){
-                                alert("err - mediaDevices is something wrong!");
-                            });
-                        } else {
-                            alert("err - you can't run it before must createVideoElement");
-                        };
-                    } else {
-                        alert("err - mediaDevices is not support on your browser looser");
-                    };
-        
-                };
-        
-                function clearRect(this_ctx) {
-                    this_ctx.fillStyle = "#000000";
-                    this_ctx.fillRect(0, 0, option.parentWidth, option.parentHeight);
-                };
-        
-                function selectASCII(fff) {
-                    var pick = Math.round(normalization(255, 0, fff, 0, contrastAscii.length - 1));
-                    return (contrastAscii[pick] ? contrastAscii[pick] : " ");
-                };
-        
-        
-        
-                function __textDrawEtc() {
-                    
-                    _bctx.fillStyle   = "#fafafa";
-                    _bctx.font        = "14px monospace";
-                    _bctx.fillText("FPS : " + option.fps, 100, 210);
-                    _bctx.fillText("ok good", 100, 200);
-                    
-                    
-                };
-        
-                function __textDrawInSleep() {
-                    _bctx.fillStyle   = "#fafafa";
-                    _bctx.font        = "14px monospace";
-                    _bctx.fillText("[SLEEP !!]", 100, 230);
-                };
-        
-                function __drawGrid() {
-                    if (renderBox.length != 0) {
-                        var i = 0;
-                        var x = 0;
-                        var y = 0;
-                        _bctx.fillStyle   = "#fafafa";
-                        _bctx.font        = "8px monospace";
- 
-                        // console.log(option.contentWidth, option.contentHeight, renderBox[i].length);
-
-                        for(x=0;x<option.contentWidth*0.3;++x) {
-                            for(y=0;y<option.contentHeight*0.3;++y) {
-                                if (renderBox[i][x]) {
-                                    if (renderBox[i][x].length != 0 && renderBox[i][x][y]) {
-                                        let buffer_str = selectASCII(renderBox[i][x][y]);
-                                       
-                                            _bctx.fillText(buffer_str, (x + (x*option.textSpace)), (y + (y*option.textSpace)));
-                                        
-   
-                                    };
-                                }
-                            };
-                        };
-
-                        if (option.isStaticLoad === false)
-                            renderBox.shift();
-                    };
-                };
-        
-                function draw(timestamp) {
-
-
-                    if (option.stopDrawing === true) {
-                        clearRect(ctx);
-                        clearRect(_bctx);
-                        window.requestAnimationFrame(draw);
-                        return false;
-                    };
-
-                    if (imageLength != imageBox.length && option.isStaticLoad === true) {
-                        console.log("Now loading...", imageLength, imageBox.length, option.isStaticLoad);
-                        window.requestAnimationFrame(draw);
-                        return false;
-                    };
-        
-                    // console.log("ruun");
-
-                    if ((timestamp - option.frameStock) <= 1000) {
-                        ++option.fps;
-                        // __textDrawInSleep();
-                    };
-                    
-                    if (option.initLoad === false) {
-                        option.initLoad = true;
-                        console.log(renderBox);
-                    };
-        
-
-
-                    //clear
-                    clearRect(ctx);
-                    clearRect(_bctx);
-                    __drawGrid();
-                    // __textDrawEtc();
-
-                    ctx.drawImage(_canvasBuffer, 0, 0);
-        
-                    option.fps = 0;
-                    option.frameStock = timestamp;
-        
-
-                     setTimeout(function() {
-                        window.requestAnimationFrame(draw);
-                     }, 256)
-                    return true;
-                };
-        
-                function _rgbMerge2SpecifiedValue(r, g, b) {
-                    return Math.floor(((255 - r) + (255 - g) + (255 - b)) / 3);
-                };
-        
-                function _convertAscii2Image(img) {
-                    var self = [];
-                    var ix = 0;
-                    var iy = 0;
-                    var pass = false;
-                    if (img.naturalWidth != undefined && img.naturalHeight != undefined) {
-                        pass = true;
-                        try {
-                            clearRect(_mctx);
-                            _mctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
-                            
-                            for(ix=0;ix<img.naturalWidth;++ix) {
-                                // console.log("init x : ",ix ,img.naturalWidth);
-                                self[ix] = [];
-                                for(iy=0;iy<img.naturalHeight;++iy) {
-                                    // console.log("init y : ",iy ,img.naturalHeight);
-                                    self[ix][iy] = 0;
-                                };
-                            };
-            
-                            for(ix=0;ix<img.naturalWidth;++ix) {
-                                for(iy=0;iy<img.naturalHeight;++iy) {
-                                    // console.log("conv progress : ",ix+iy ,img.naturalWidth+img.naturalHeight);
-                                    self[ix][iy] = _pickaPixel(ix, iy);
-                                };
-                            };
-                        } catch(e) {
-                            console.error("err - image load is something wrong.");
-                        };
-
-        
-                    };
-
-                    if (pass === true) {renderBox.push(self);}
-                };
-        
-        
-                function renderBoxClear() {
-                    renderBox = null;
-                    renderBox = [];
-                };
-
-                function _pickaPixel(x, y) {
-                    console.log(x,y);
-                    var pixel = _mctx.getImageData(x, y, 1, 1);
-                    var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
-                    return value;
-                };
-        
-        
-                function _imageLoadHandler_success(e, type) {
-                    if (e.path != undefined) {
-                        // console.log("image loaded : ",e, type);
-                        for(var key in e.path) {
-                            imageBox.push(e.path[key]);
-                            _convertAscii2Image(e.path[key]);
-                        };
-                    };
-                };
-                function _imageLoadHandler_error() {
-                    --imageLength;
-                };
-                function _loadImageData(url) {
-                    option.isStaticLoad = true;
-                    var image = new Image();
-                
-                    image.onload = _imageLoadHandler_success;
-                    image.onerror = _imageLoadHandler_error;
-                    image.crossOrigin = "anonymous";
-                    image.src = url;
-        
-                    ++imageLength;
-                };
-        
-                function _genScene() {
-        
-                };
-        
-        
-        
-                function _getElementPos(element) {
-                    return {
-                        width   : (element.offsetWidth >= element.clientWidth ? element.clientWidth : element.offsetWidth),
-                        height  : (element.offsetHeight >= element.clientHeight ? element.clientHeight : element.offsetHeight)
-                    };
-                };
-        
-        
-        
-        
-        
-        
-                
-                function _resizeToCustomSizeOfNode(element, w, h) {
-                    if (element != undefined) {
-                        // element.width     = def.width+"px";
-                        // element.height    = def.height+"px";
-                        element.setAttribute("width", w+"px");
-                        element.setAttribute("height", h+"px");
-                    };
-                };
-                function _resizeToMaximumSizeOfNode(element) {
-                    var def = _getElementPos(parent);
-                    if (element != undefined) {
-                        // element.width     = def.width+"px";
-                        // element.height    = def.height+"px";
-                        element.setAttribute("width", def.width+"px");
-                        element.setAttribute("height", def.height+"px");
-                        option.parentWidth  = def.width;
-                        option.parentHeight = def.height;
-                    };
-                };
-        
-                function _background2black(element) {
-                    if (element != undefined) {
-                        element.style.backgroundColor = "#000000";
-                    };
-                };
-        
-                function _nodeIsNoMargins(element) {
-                    if (element != undefined) {
-                        element.style.marginLeft    = "0px";
-                        element.style.marginRight   = "0px";
-                        element.style.marginTop     = "0px";
-                        element.style.marginBottom  = "0px";
-                    };
-                };
-        
-                function _nodeIsNoPads(element) {
-                    if (element != undefined) {
-                        element.style.paddingLeft    = "0px";
-                        element.style.paddingRight   = "0px";
-                        element.style.paddingTop     = "0px";
-                        element.style.paddingBottom  = "0px";
-                    };
-                };
-        
-                function _nodeIsFixedStyle(element) {
-                    if (element != undefined) {
-                        element.style.position = "fixed";
-                        element.style.left     = "0";
-                        element.style.right    = "0";
-                        element.style.top      = "0";
-                        element.style.bottom   = "0";
-                    };
-                };
-        
-                //기본 입장시 이미지 로드
-                //버튼을 눌러서 초기화 가능
-                function dataLoader() {
-        
-                    // _loadImageData("./download.jpg");
-                };
-        
-                function opening() {
-
-                    _initEventAttach();
-
-                    _nodeIsNoPads(parent);
-                    _nodeIsNoMargins(parent);
-        
-                    _background2black(canvas);
-                    _nodeIsNoPads(canvas);
-                    _nodeIsNoMargins(canvas);
-                    _nodeIsFixedStyle(canvas);
-                    _resizeToMaximumSizeOfNode(canvas);
-                    //ctx.setTransform(1,0,0,1,0,0);
-        
-        
-                    // _resizeToMaximumSizeOfNode(_mcanvas);
-                    _resizeToMaximumSizeOfNode(_canvasBuffer);
-        
-                    //data load for convertion
-                    dataLoader();
-        
-
-
-
-
-
-                    parent.appendChild(canvas);
-                    window.requestAnimationFrame(draw);
-                };
-        
-                function init() {
-                    parent = window.document.body;
-                    opening();
-                };
-
-                function _initEventAttach() {
-                    
-                    getElement().BTN.TEST_IMAGE_LOAD.innerHTML = "LOAD TEST IMAGE";
-                    getElement().BTN.TEST_IMAGE_LOAD.addEventListener("click", function() {
-                        option.isStaticLoad = true;
-                        renderBoxClear();
-                        _loadImageData("./download.jpg");
-                        option.stopDrawing = false;
-                        alert("OK GOOD");
-                    });
-
-
-
-
-                    getElement().BTN.VIDEO_ACCESS.innerHTML = "GET STREAM ACCESS AND CONVERT CAM TOGGLE";
-                    getElement().BTN.VIDEO_ACCESS.addEventListener("click", function() {
-                        option.isStaticLoad = false;
-                        if (option.$video != null) {
-                            _removeVideoElement();
-                            option.stopDrawing = true;
-                            alert("disabled");
-                        } else {
-                            if (confirm("YOU OK?")) {
-                                option.stopDrawing = false;
-                                // option.stopDrawing = true;
+                    if (videoDevices.length > 0) {
+                        navigator.mediaDevices.getUserMedia({ video: { deviceId: videoDevices[0].deviceId } })
+                            .then(stream => {
+                                option.$video.srcObject = stream;
+                                console.log("Video stream started.");
                                 _createVideoElement();
-                                _getVideoAccess();
-                            };
-                        };
-                    });
+                            }).catch(err => {
+                                console.error("Video access denied:", err);
+                            });
+                    } else {
+                        alert("No video device found.");
+                    }
+                }).catch(err => {
+                    console.error("Error enumerating devices:", err);
+                });
+            } else {
+                alert("Your browser does not support video devices.");
+            }
+        }
 
+        const chars = "@#8&$%*o!;:,. ";
+        function videoToAscii() {
+            if (!option.$video) return;
 
+            const canvasWidth = _bctx.canvas.width;
+            const canvasHeight = _bctx.canvas.height;
+            const imageData = _bctx.getImageData(0, 0, canvasWidth, canvasHeight);
+            const data = imageData.data;
 
-                    getElement().BTN.STOP.innerHTML = "STOP";
-                    getElement().BTN.STOP.addEventListener("click", function() {
-                        renderBoxClear();
-                        option.stopDrawing = true;
-                        alert("stop!");
-                    });
+            let asciiImage = '';
+            for (let y = 0; y < canvasHeight; y += 10) {
+                let row = '';
+                for (let x = 0; x < canvasWidth; x += 5) {
+                    const index = (y * canvasWidth + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    const brightness = (r + g + b) / 3 * option.sensitivity;
+                    const charIndex = Math.floor((brightness / 255) * (chars.length - 1));
+                    row += chars[charIndex];
+                }
+                asciiImage += row + '\n';
+            }
 
+            const output = document.getElementById('asciiOutput');
+            output.textContent = asciiImage;
+        }
 
+        function adjustSensitivity(value) {
+            option.sensitivity = value;
+            console.log("Adjusted sensitivity to:", value);
+            videoToAscii();
+        }
 
+        const elements = {
+            BTN_VIDEO_ACCESS: document.getElementById("BTN_ACCESS_VIDEO")
+        };
 
+        elements.BTN_VIDEO_ACCESS.addEventListener("click", () => {
+            if (!option.$video) _createVideoElement();
+            _getVideoAccess();
+        });
 
+        draw();
+    })();
+</script>
 
-
-                };
-        
-                function initEventReAttach() {
-                    //window.removeEventListener("load");
-                    window.addEventListener("load", function() {
-                        init();
-                    }, false);
-        
-                    // window.removeEventListener("resize");
-                    window.addEventListener("resize", function() {
-                        _resizeToMaximumSizeOfNode(canvas);
-                        _resizeToMaximumSizeOfNode(_canvasBuffer);
-                        // _resizeToMaximumSizeOfNode(_mcanvas);
-                    }, false);
-                };
-        
-        
-        
-        
-        
-        
-        
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                initEventReAttach();
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-                /** -------------------------------------------------*/
-            })(window.document.body, window.document.createElement("canvas"), window.document.createElement("canvas"), window.document.createElement("canvas"));
-        </script>
-        
-    </body>
 </html>
