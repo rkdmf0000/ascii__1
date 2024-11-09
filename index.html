@@ -320,6 +320,7 @@
                 };
 
                 function _pickaPixel(x, y) {
+                    console.log(x,y);
                     var pixel = _mctx.getImageData(x, y, 1, 1);
                     var value = _rgbMerge2SpecifiedValue(pixel.data[0], pixel.data[1], pixel.data[2])
                     return value;
