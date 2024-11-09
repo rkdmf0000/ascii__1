@@ -236,7 +236,7 @@
                     };
 
                     if (imageLength != imageBox.length && option.isStaticLoad === true) {
-                        console.log("Now loading...");
+                        console.log("Now loading...", imageLength, imageBox.length, option.isStaticLoad);
                         window.requestAnimationFrame(draw);
                         return false;
                     };
